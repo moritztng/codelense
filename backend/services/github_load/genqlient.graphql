@@ -1,0 +1,16 @@
+query getRepositories {
+  search(
+    query: "is:public stars:500..1000 sort:stars-asc"
+    type: REPOSITORY
+    first: 100
+  ) {
+    edges {
+      node {
+        ... on Repository {
+          name
+          stargazerCount
+        }
+      }
+    }
+  }
+}
