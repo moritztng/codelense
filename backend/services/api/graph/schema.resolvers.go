@@ -6,13 +6,47 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"strconv"
+	"time"
+
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 // Text is the resolver for the text field.
 func (r *queryResolver) Text(ctx context.Context) (string, error) {
-	var text string
-	err := r.Database.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&text)
-	return text, err
+	type apiGithubRequest struct {
+		Name string
+	}
+	type githubStoreResult struct {
+		Name  string
+		Stars uint
+	}
+	produceTopic := "api_github_requests"
+	request, _ := json.Marshal(apiGithubRequest{strconv.Itoa(rand.Intn(100))})
+	fmt.Println("start produce")
+	r.Producer.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
+		Value:          request,
+	}, nil)
+	r.Producer.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
+		Value:          request,
+	}, nil)
+	fmt.Println("end produce")
+	var result githubStoreResult
+	for {
+		message, err := r.Consumer.ReadMessage(time.Second)
+		if err == nil {
+			json.Unmarshal(message.Value, &result)
+			break
+		} else {
+			fmt.Println(err)
+		}
+	}
+	return result.Name, nil
 }
 
 // Query returns QueryResolver implementation.

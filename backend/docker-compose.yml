@@ -10,14 +10,19 @@ services:
   #   ports:
   #     - 5000:8080
 
-  db:
+  github_database:
     image: postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: example
+      POSTGRES_USER: admin
+      POSTGRES_DB: github
+      POSTGRES_PASSWORD: adastra
       PGPORT: 5001
+      PGDATA: /var/lib/postgresql/data
     ports:
       - 5001:5001
+    volumes:
+      - ./data:/var/lib/postgresql/data
 
   adminer:
     image: adminer
