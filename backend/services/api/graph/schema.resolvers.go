@@ -8,35 +8,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/google/uuid"
+	"github.com/moritztng/codelense/backend/messaging"
+	"github.com/moritztng/codelense/backend/services/api/graph/model"
 )
 
-// Text is the resolver for the text field.
-func (r *queryResolver) Text(ctx context.Context) (string, error) {
-	type apiGithubRequest struct {
-		Name string
-	}
-	type githubStoreResult struct {
-		Name  string
-		Stars uint
-	}
+// Repositories is the resolver for the repositories field.
+func (r *queryResolver) Repositories(ctx context.Context, maxStars int, first int) (*model.Repositories, error) {
 	produceTopic := "api_github_requests"
-	request, _ := json.Marshal(apiGithubRequest{strconv.Itoa(rand.Intn(100))})
-	fmt.Println("start produce")
+	key := uuid.New().String()
+	request, _ := json.Marshal(messaging.ApiGithubRequest{Key: key, MaxStars: uint(maxStars), First: uint(first)})
 	r.Producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
 		Value:          request,
 	}, nil)
-	r.Producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
-		Value:          request,
-	}, nil)
-	fmt.Println("end produce")
-	var result githubStoreResult
+	var result messaging.GithubStoreResult
 	for {
 		message, err := r.Consumer.ReadMessage(time.Second)
 		if err == nil {
@@ -46,7 +35,11 @@ func (r *queryResolver) Text(ctx context.Context) (string, error) {
 			fmt.Println(err)
 		}
 	}
-	return result.Name, nil
+	var repositories model.Repositories
+	for _, repository := range result.Repositories {
+		repositories.Repositories = append(repositories.Repositories, &model.Repository{Owner: repository.Owner, Name: repository.Name, Stars: int(repository.Stars)})
+	}
+	return &repositories, nil
 }
 
 // Query returns QueryResolver implementation.

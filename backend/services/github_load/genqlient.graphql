@@ -7,6 +7,9 @@ query getRepositories {
     edges {
       node {
         ... on Repository {
+          owner {
+              login
+            }
           name
           stargazerCount
         }

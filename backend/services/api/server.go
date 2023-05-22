@@ -8,16 +8,10 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/moritztng/codelense/backend/messaging"
 	"github.com/moritztng/codelense/backend/services/api/graph"
 )
-
-const defaultPort = "8080"
-
-type Repo struct {
-	Name  string
-	Stars uint
-}
 
 func main() {
 	conf := messaging.ReadConfig("kafka.properties")
@@ -28,10 +22,6 @@ func main() {
 	defer consumer.Close()
 
 	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
-
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Consumer: consumer, Producer: producer}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))

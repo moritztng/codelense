@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -12,60 +13,41 @@ import (
 	"github.com/moritztng/codelense/backend/messaging"
 )
 
-type Repo struct {
-	Name  string
-	Stars uint
-}
-type githubStoreResult struct {
-	Name  string
-	Stars uint
-}
-
-type apiGithubRequest struct {
-	Name string
-}
-
 func main() {
-	conn, _ := pgx.Connect(context.Background(), "postgresql://postgres:example@localhost:5001/postgres")
-	defer conn.Close(context.Background())
+	databaseUrl := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
+	databaseConn, _ := pgx.Connect(context.Background(), databaseUrl)
+	defer databaseConn.Close(context.Background())
 	conf := messaging.ReadConfig("kafka.properties")
 	consumer, _ := kafka.NewConsumer(&conf)
 	producer, _ := kafka.NewProducer(&conf)
 	defer producer.Close()
 	defer consumer.Close()
-	consumer.SubscribeTopics([]string{"github", "api_github_requests"}, nil)
+	consumer.SubscribeTopics([]string{"github_load_repositories", "api_github_requests"}, nil)
 	for {
 		message, err := consumer.ReadMessage(time.Second)
 		if err == nil {
 			switch *message.TopicPartition.Topic {
-			case "github":
-				var repo Repo
-				json.Unmarshal(message.Value, &repo)
-				tx, _ := conn.Begin(context.Background())
+			case "github_load_repositories":
+				var repository messaging.Repository
+				json.Unmarshal(message.Value, &repository)
+				tx, _ := databaseConn.Begin(context.Background())
 				defer tx.Rollback(context.Background())
-				_, err = tx.Exec(context.Background(), "insert into github(name, stars) values ($1,$2)", repo.Name, repo.Stars)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
+				_, err = tx.Exec(context.Background(), "insert into repositories(owner, name, stars) values ($1, $2, $3)", repository.Owner, repository.Name, repository.Stars)
+				fmt.Println(err)
 				err = tx.Commit(context.Background())
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
+				fmt.Println(err)
 			case "api_github_requests":
-				fmt.Println("github_request")
-				var request apiGithubRequest
+				var request messaging.ApiGithubRequest
 				json.Unmarshal(message.Value, &request)
-				result, _ := json.Marshal(githubStoreResult{request.Name, 2})
-				topic := "github_store_results"
-				fmt.Println("produce")
+				rows, _ := databaseConn.Query(context.Background(), "select owner, name, stars from repositories where stars<=$1 order by stars desc limit $2", request.MaxStars, request.First)
+				defer rows.Close()
+				repositories, _ := pgx.CollectRows(rows, pgx.RowToAddrOfStructByPos[messaging.Repository])
+				result, _ := json.Marshal(messaging.GithubStoreResult{Key: request.Key, Repositories: repositories})
+				produceTopic := "github_store_results"
 				producer.Produce(&kafka.Message{
-					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+					TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
 					Value:          result,
 				}, nil)
-				fmt.Println("end produce")
-
 			}
 		} else {
 			fmt.Println(err)

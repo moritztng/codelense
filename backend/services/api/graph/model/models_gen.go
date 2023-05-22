@@ -2,6 +2,12 @@
 
 package model
 
-type Todo struct {
-	ID string `json:"id"`
+type Repositories struct {
+	Repositories []*Repository `json:"repositories"`
+}
+
+type Repository struct {
+	Owner string `json:"owner"`
+	Name  string `json:"name"`
+	Stars int    `json:"stars"`
 }

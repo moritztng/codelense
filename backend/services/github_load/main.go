@@ -23,28 +23,23 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func main() {
-	topic := "github"
 	conf := messaging.ReadConfig("kafka.properties")
-	p, _ := kafka.NewProducer(&conf)
-	ctx := context.Background()
+	producer, _ := kafka.NewProducer(&conf)
 	client := graphql.NewClient("https://api.github.com/graphql",
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
-	resp, _ := getRepositories(ctx, client)
-	repos := resp.Search.Edges
-	for i := 0; i < len(repos); i++ {
-		type Repo struct {
-			Name  string
-			Stars uint
-		}
-		repo := repos[i].Node.(*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository)
-		repoJson, _ := json.Marshal(Repo{repo.Name, uint(repo.StargazerCount)})
-		p.Produce(&kafka.Message{
+	response, _ := getRepositories(context.Background(), client)
+	edges := response.Search.Edges
+	for _, edge := range edges {
+		repository := edge.Node.(*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository)
+		repositoryJson, _ := json.Marshal(messaging.Repository{Owner: repository.Owner.GetLogin(), Name: repository.Name, Stars: uint(repository.StargazerCount)})
+		topic := "github_load_repositories"
+		producer.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-			Value:          repoJson,
+			Value:          repositoryJson,
 		}, nil)
 	}
-	p.Flush(15 * 1000)
-	p.Close()
+	producer.Flush(15 * 1000)
+	producer.Close()
 }
 
 //go:generate go run github.com/Khan/genqlient

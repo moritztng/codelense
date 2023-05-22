@@ -2,10 +2,16 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
+type Repositories {
+  repositories: [Repository]!
+}
+
+type Repository {
+  owner: String!
+  name: String!
+  stars: Int!
 }
 
 type Query {
-  text: String!
+  repositories(maxStars: Int!, first: Int!): Repositories!
 }
