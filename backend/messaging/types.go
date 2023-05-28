@@ -1,5 +1,7 @@
 package messaging
 
+import "time"
+
 type ApiGithubRequest struct {
 	Key      string
 	MaxStars uint
@@ -12,7 +14,8 @@ type GithubStoreResult struct {
 }
 
 type Repository struct {
-	Owner string
-	Name  string
-	Stars uint
+	Key       int
+	Login     string
+	Name      string
+	CreatedAt time.Time
 }

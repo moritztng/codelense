@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -27,16 +28,36 @@ func main() {
 	producer, _ := kafka.NewProducer(&conf)
 	client := graphql.NewClient("https://api.github.com/graphql",
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
-	response, _ := getRepositories(context.Background(), client)
-	edges := response.Search.Edges
-	for _, edge := range edges {
-		repository := edge.Node.(*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository)
-		repositoryJson, _ := json.Marshal(messaging.Repository{Owner: repository.Owner.GetLogin(), Name: repository.Name, Stars: uint(repository.StargazerCount)})
-		topic := "github_load_repositories"
-		producer.Produce(&kafka.Message{
-			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-			Value:          repositoryJson,
-		}, nil)
+	minCreated := "1970-01-01"
+	hasEdges := true
+	total := 0
+	for hasEdges {
+		hasNextPage := true
+		nextPageCursor := ""
+		query := fmt.Sprintf("location:Germany type:org sort:joined-asc created:>%s", minCreated)
+		for hasNextPage {
+			response, _ := getOrganizations(context.Background(), client, nextPageCursor, query)
+			edges := response.Search.Edges
+			if len(edges) == 0 {
+				hasEdges = false
+				break
+			}
+			for _, edge := range edges {
+				organization := edge.Node.(*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
+				organizationJson, _ := json.Marshal(messaging.Repository{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt})
+				topic := "github_load_organizations"
+				producer.Produce(&kafka.Message{
+					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+					Value:          organizationJson,
+				}, nil)
+				minCreated = organization.CreatedAt.Format("2006-01-02")
+				total += 1
+			}
+			fmt.Println(minCreated)
+			fmt.Println(total)
+			hasNextPage = response.Search.PageInfo.HasNextPage
+			nextPageCursor = response.Search.PageInfo.EndCursor
+		}
 	}
 	producer.Flush(15 * 1000)
 	producer.Close()

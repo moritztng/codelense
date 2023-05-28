@@ -6,63 +6,89 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/Khan/genqlient/graphql"
 )
 
-// getRepositoriesResponse is returned by getRepositories on success.
-type getRepositoriesResponse struct {
-	// Perform a search across resources, returning a maximum of 1,000 results.
-	Search getRepositoriesSearchSearchResultItemConnection `json:"search"`
+// __getOrganizationsInput is used internally by genqlient
+type __getOrganizationsInput struct {
+	Cursor string `json:"cursor,omitempty"`
+	Query  string `json:"query"`
 }
 
-// GetSearch returns getRepositoriesResponse.Search, and is useful for accessing the field via an interface.
-func (v *getRepositoriesResponse) GetSearch() getRepositoriesSearchSearchResultItemConnection {
+// GetCursor returns __getOrganizationsInput.Cursor, and is useful for accessing the field via an interface.
+func (v *__getOrganizationsInput) GetCursor() string { return v.Cursor }
+
+// GetQuery returns __getOrganizationsInput.Query, and is useful for accessing the field via an interface.
+func (v *__getOrganizationsInput) GetQuery() string { return v.Query }
+
+// getOrganizationsResponse is returned by getOrganizations on success.
+type getOrganizationsResponse struct {
+	// Perform a search across resources, returning a maximum of 1,000 results.
+	Search getOrganizationsSearchSearchResultItemConnection `json:"search"`
+}
+
+// GetSearch returns getOrganizationsResponse.Search, and is useful for accessing the field via an interface.
+func (v *getOrganizationsResponse) GetSearch() getOrganizationsSearchSearchResultItemConnection {
 	return v.Search
 }
 
-// getRepositoriesSearchSearchResultItemConnection includes the requested fields of the GraphQL type SearchResultItemConnection.
+// getOrganizationsSearchSearchResultItemConnection includes the requested fields of the GraphQL type SearchResultItemConnection.
 // The GraphQL type's documentation follows.
 //
 // A list of results that matched against a search query. Regardless of the number
 // of matches, a maximum of 1,000 results will be available across all types,
 // potentially split across many pages.
-type getRepositoriesSearchSearchResultItemConnection struct {
+type getOrganizationsSearchSearchResultItemConnection struct {
+	// The total number of users that matched the search query. Regardless of the
+	// total number of matches, a maximum of 1,000 results will be available across all types.
+	UserCount int `json:"userCount"`
 	// A list of edges.
-	Edges []getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge `json:"edges"`
+	Edges []getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge `json:"edges"`
+	// Information to aid in pagination.
+	PageInfo getOrganizationsSearchSearchResultItemConnectionPageInfo `json:"pageInfo"`
 }
 
-// GetEdges returns getRepositoriesSearchSearchResultItemConnection.Edges, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnection) GetEdges() []getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge {
+// GetUserCount returns getOrganizationsSearchSearchResultItemConnection.UserCount, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnection) GetUserCount() int { return v.UserCount }
+
+// GetEdges returns getOrganizationsSearchSearchResultItemConnection.Edges, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnection) GetEdges() []getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge {
 	return v.Edges
 }
 
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge includes the requested fields of the GraphQL type SearchResultItemEdge.
+// GetPageInfo returns getOrganizationsSearchSearchResultItemConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnection) GetPageInfo() getOrganizationsSearchSearchResultItemConnectionPageInfo {
+	return v.PageInfo
+}
+
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge includes the requested fields of the GraphQL type SearchResultItemEdge.
 // The GraphQL type's documentation follows.
 //
 // An edge in a connection.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge struct {
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge struct {
 	// The item at the end of the edge.
-	Node getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem `json:"-"`
+	Node getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem `json:"-"`
 }
 
-// GetNode returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge.Node, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge) GetNode() getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem {
+// GetNode returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge.Node, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge) GetNode() getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem {
 	return v.Node
 }
 
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge) UnmarshalJSON(b []byte) error {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
 		return nil
 	}
 
 	var firstPass struct {
-		*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge
+		*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge
 		Node json.RawMessage `json:"node"`
 		graphql.NoUnmarshalJSON
 	}
-	firstPass.getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge = v
+	firstPass.getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge = v
 
 	err := json.Unmarshal(b, &firstPass)
 	if err != nil {
@@ -73,22 +99,22 @@ func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdg
 		dst := &v.Node
 		src := firstPass.Node
 		if len(src) != 0 && string(src) != "null" {
-			err = __unmarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem(
+			err = __unmarshalgetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem(
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"unable to unmarshal getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge.Node: %w", err)
+					"unable to unmarshal getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge.Node: %w", err)
 			}
 		}
 	}
 	return nil
 }
 
-type __premarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge struct {
+type __premarshalgetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge struct {
 	Node json.RawMessage `json:"node"`
 }
 
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge) MarshalJSON() ([]byte, error) {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge) MarshalJSON() ([]byte, error) {
 	premarshaled, err := v.__premarshalJSON()
 	if err != nil {
 		return nil, err
@@ -96,367 +122,181 @@ func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdg
 	return json.Marshal(premarshaled)
 }
 
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge) __premarshalJSON() (*__premarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge, error) {
-	var retval __premarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge) __premarshalJSON() (*__premarshalgetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge, error) {
+	var retval __premarshalgetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge
 
 	{
 
 		dst := &retval.Node
 		src := v.Node
 		var err error
-		*dst, err = __marshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem(
+		*dst, err = __marshalgetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"unable to marshal getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdge.Node: %w", err)
+				"unable to marshal getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdge.Node: %w", err)
 		}
 	}
 	return &retval, nil
 }
 
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp includes the requested fields of the GraphQL type App.
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp includes the requested fields of the GraphQL type App.
 // The GraphQL type's documentation follows.
 //
 // A GitHub App.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp struct {
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp struct {
 	Typename string `json:"__typename"`
 }
 
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp) GetTypename() string {
+// GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp.Typename, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp) GetTypename() string {
 	return v.Typename
 }
 
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion includes the requested fields of the GraphQL type Discussion.
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion includes the requested fields of the GraphQL type Discussion.
 // The GraphQL type's documentation follows.
 //
 // A discussion in a repository.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion struct {
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion struct {
 	Typename string `json:"__typename"`
 }
 
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion) GetTypename() string {
+// GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion.Typename, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion) GetTypename() string {
 	return v.Typename
 }
 
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue includes the requested fields of the GraphQL type Issue.
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
 // An Issue is a place to discuss ideas, enhancements, tasks, and bugs for a project.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue struct {
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue struct {
 	Typename string `json:"__typename"`
 }
 
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue) GetTypename() string {
+// GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue.Typename, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue) GetTypename() string {
 	return v.Typename
 }
 
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing includes the requested fields of the GraphQL type MarketplaceListing.
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing includes the requested fields of the GraphQL type MarketplaceListing.
 // The GraphQL type's documentation follows.
 //
 // A listing in the GitHub integration marketplace.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing struct {
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing struct {
 	Typename string `json:"__typename"`
 }
 
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing) GetTypename() string {
+// GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing.Typename, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing) GetTypename() string {
 	return v.Typename
 }
 
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization includes the requested fields of the GraphQL type Organization.
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization includes the requested fields of the GraphQL type Organization.
 // The GraphQL type's documentation follows.
 //
 // An account on GitHub, with one or more owners, that has repositories, members and teams.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization struct {
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization struct {
 	Typename string `json:"__typename"`
-}
-
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetTypename() string {
-	return v.Typename
-}
-
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest includes the requested fields of the GraphQL type PullRequest.
-// The GraphQL type's documentation follows.
-//
-// A repository pull request.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest struct {
-	Typename string `json:"__typename"`
-}
-
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest) GetTypename() string {
-	return v.Typename
-}
-
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository includes the requested fields of the GraphQL type Repository.
-// The GraphQL type's documentation follows.
-//
-// A repository contains the content for a project.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository struct {
-	Typename string `json:"__typename"`
-	// The User owner of the repository.
-	Owner getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner `json:"-"`
-	// The name of the repository.
+	// Identifies the primary key from the database.
+	DatabaseId int `json:"databaseId"`
+	// The organization's login name.
+	Login string `json:"login"`
+	// The organization's public profile name.
 	Name string `json:"name"`
-	// Returns a count of how many stargazers there are on this object
-	StargazerCount int `json:"stargazerCount"`
+	// Identifies the date and time when the object was created.
+	CreatedAt time.Time `json:"createdAt"`
 }
 
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) GetTypename() string {
+// GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Typename, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetTypename() string {
 	return v.Typename
 }
 
-// GetOwner returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository.Owner, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) GetOwner() getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner {
-	return v.Owner
+// GetDatabaseId returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.DatabaseId, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetDatabaseId() int {
+	return v.DatabaseId
 }
 
-// GetName returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository.Name, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) GetName() string {
+// GetLogin returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Login, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetLogin() string {
+	return v.Login
+}
+
+// GetName returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Name, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetName() string {
 	return v.Name
 }
 
-// GetStargazerCount returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository.StargazerCount, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) GetStargazerCount() int {
-	return v.StargazerCount
+// GetCreatedAt returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.CreatedAt, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetCreatedAt() time.Time {
+	return v.CreatedAt
 }
 
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository
-		Owner json.RawMessage `json:"owner"`
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	{
-		dst := &v.Owner
-		src := firstPass.Owner
-		if len(src) != 0 && string(src) != "null" {
-			err = __unmarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner(
-				src, dst)
-			if err != nil {
-				return fmt.Errorf(
-					"unable to unmarshal getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository.Owner: %w", err)
-			}
-		}
-	}
-	return nil
-}
-
-type __premarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository struct {
-	Typename string `json:"__typename"`
-
-	Owner json.RawMessage `json:"owner"`
-
-	Name string `json:"name"`
-
-	StargazerCount int `json:"stargazerCount"`
-}
-
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) __premarshalJSON() (*__premarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository, error) {
-	var retval __premarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository
-
-	retval.Typename = v.Typename
-	{
-
-		dst := &retval.Owner
-		src := v.Owner
-		var err error
-		*dst, err = __marshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner(
-			&src)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"unable to marshal getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository.Owner: %w", err)
-		}
-	}
-	retval.Name = v.Name
-	retval.StargazerCount = v.StargazerCount
-	return &retval, nil
-}
-
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner includes the requested fields of the GraphQL interface RepositoryOwner.
-//
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner is implemented by the following types:
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest includes the requested fields of the GraphQL type PullRequest.
 // The GraphQL type's documentation follows.
 //
-// Represents an owner of a Repository.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner interface {
-	implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner()
-	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
-	GetTypename() string
-	// GetLogin returns the interface-field "login" from its implementation.
-	// The GraphQL interface field's documentation follows.
-	//
-	// The username used to login.
-	GetLogin() string
-}
-
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner() {
-}
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner() {
-}
-
-func __unmarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner(b []byte, v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner) error {
-	if string(b) == "null" {
-		return nil
-	}
-
-	var tn struct {
-		TypeName string `json:"__typename"`
-	}
-	err := json.Unmarshal(b, &tn)
-	if err != nil {
-		return err
-	}
-
-	switch tn.TypeName {
-	case "Organization":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization)
-		return json.Unmarshal(b, *v)
-	case "User":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser)
-		return json.Unmarshal(b, *v)
-	case "":
-		return fmt.Errorf(
-			"response was missing RepositoryOwner.__typename")
-	default:
-		return fmt.Errorf(
-			`unexpected concrete type for getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner: "%v"`, tn.TypeName)
-	}
-}
-
-func __marshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner(v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner) ([]byte, error) {
-
-	var typename string
-	switch v := (*v).(type) {
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization:
-		typename = "Organization"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization
-		}{typename, v}
-		return json.Marshal(result)
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser:
-		typename = "User"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser
-		}{typename, v}
-		return json.Marshal(result)
-	case nil:
-		return []byte("null"), nil
-	default:
-		return nil, fmt.Errorf(
-			`unexpected concrete type for getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwner: "%T"`, v)
-	}
-}
-
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization includes the requested fields of the GraphQL type Organization.
-// The GraphQL type's documentation follows.
-//
-// An account on GitHub, with one or more owners, that has repositories, members and teams.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization struct {
+// A repository pull request.
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest struct {
 	Typename string `json:"__typename"`
-	// The username used to login.
-	Login string `json:"login"`
 }
 
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization) GetTypename() string {
+// GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest.Typename, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest) GetTypename() string {
 	return v.Typename
 }
 
-// GetLogin returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization.Login, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerOrganization) GetLogin() string {
-	return v.Login
-}
-
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser includes the requested fields of the GraphQL type User.
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository includes the requested fields of the GraphQL type Repository.
 // The GraphQL type's documentation follows.
 //
-// A user is an individual's account on GitHub that owns repositories and can make new content.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser struct {
+// A repository contains the content for a project.
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository struct {
 	Typename string `json:"__typename"`
-	// The username used to login.
-	Login string `json:"login"`
 }
 
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser) GetTypename() string {
+// GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository.Typename, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) GetTypename() string {
 	return v.Typename
 }
 
-// GetLogin returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser.Login, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepositoryOwnerUser) GetLogin() string {
-	return v.Login
-}
-
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem includes the requested fields of the GraphQL interface SearchResultItem.
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem includes the requested fields of the GraphQL interface SearchResultItem.
 //
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem is implemented by the following types:
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem is implemented by the following types:
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser
 // The GraphQL type's documentation follows.
 //
 // The results of a search.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem interface {
-	implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem()
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem interface {
+	implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem()
 	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
 	GetTypename() string
 }
 
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp) implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
 }
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion) implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
 }
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue) implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
 }
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing) implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
 }
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
 }
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest) implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
 }
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository) implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
 }
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser) implementsGraphQLInterfacegetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser) implementsGraphQLInterfacegetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem() {
 }
 
-func __unmarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem(b []byte, v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem) error {
+func __unmarshalgetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem(b []byte, v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem) error {
 	if string(b) == "null" {
 		return nil
 	}
@@ -471,163 +311,189 @@ func __unmarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResult
 
 	switch tn.TypeName {
 	case "App":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp)
+		*v = new(getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp)
 		return json.Unmarshal(b, *v)
 	case "Discussion":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion)
+		*v = new(getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion)
 		return json.Unmarshal(b, *v)
 	case "Issue":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue)
+		*v = new(getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue)
 		return json.Unmarshal(b, *v)
 	case "MarketplaceListing":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing)
+		*v = new(getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing)
 		return json.Unmarshal(b, *v)
 	case "Organization":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
+		*v = new(getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
 		return json.Unmarshal(b, *v)
 	case "PullRequest":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest)
+		*v = new(getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest)
 		return json.Unmarshal(b, *v)
 	case "Repository":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository)
+		*v = new(getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository)
 		return json.Unmarshal(b, *v)
 	case "User":
-		*v = new(getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser)
+		*v = new(getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
 			"response was missing SearchResultItem.__typename")
 	default:
 		return fmt.Errorf(
-			`unexpected concrete type for getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem: "%v"`, tn.TypeName)
+			`unexpected concrete type for getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem: "%v"`, tn.TypeName)
 	}
 }
 
-func __marshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem(v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem) ([]byte, error) {
+func __marshalgetOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem(v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem) ([]byte, error) {
 
 	var typename string
 	switch v := (*v).(type) {
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp:
+	case *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp:
 		typename = "App"
 
 		result := struct {
 			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp
+			*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeApp
 		}{typename, v}
 		return json.Marshal(result)
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion:
+	case *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion:
 		typename = "Discussion"
 
 		result := struct {
 			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion
+			*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeDiscussion
 		}{typename, v}
 		return json.Marshal(result)
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue:
+	case *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue:
 		typename = "Issue"
 
 		result := struct {
 			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue
+			*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeIssue
 		}{typename, v}
 		return json.Marshal(result)
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing:
+	case *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing:
 		typename = "MarketplaceListing"
 
 		result := struct {
 			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing
+			*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeMarketplaceListing
 		}{typename, v}
 		return json.Marshal(result)
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization:
+	case *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization:
 		typename = "Organization"
 
 		result := struct {
 			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization
+			*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization
 		}{typename, v}
 		return json.Marshal(result)
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest:
+	case *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest:
 		typename = "PullRequest"
 
 		result := struct {
 			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest
+			*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest
 		}{typename, v}
 		return json.Marshal(result)
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository:
+	case *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository:
 		typename = "Repository"
 
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*__premarshalgetRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository
-		}{typename, premarshaled}
+			*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeRepository
+		}{typename, v}
 		return json.Marshal(result)
-	case *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser:
+	case *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser:
 		typename = "User"
 
 		result := struct {
 			TypeName string `json:"__typename"`
-			*getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser
+			*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser
 		}{typename, v}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
 	default:
 		return nil, fmt.Errorf(
-			`unexpected concrete type for getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem: "%T"`, v)
+			`unexpected concrete type for getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeSearchResultItem: "%T"`, v)
 	}
 }
 
-// getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser includes the requested fields of the GraphQL type User.
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
 // A user is an individual's account on GitHub that owns repositories and can make new content.
-type getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser struct {
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser struct {
 	Typename string `json:"__typename"`
 }
 
-// GetTypename returns getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser.Typename, and is useful for accessing the field via an interface.
-func (v *getRepositoriesSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser) GetTypename() string {
+// GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser.Typename, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeUser) GetTypename() string {
 	return v.Typename
 }
 
-// The query or mutation executed by getRepositories.
-const getRepositories_Operation = `
-query getRepositories {
-	search(query: "is:public stars:500..1000 sort:stars-asc", type: REPOSITORY, first: 100) {
+// getOrganizationsSearchSearchResultItemConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// Information about pagination in a connection.
+type getOrganizationsSearchSearchResultItemConnectionPageInfo struct {
+	// When paginating forwards, the cursor to continue.
+	EndCursor string `json:"endCursor"`
+	// When paginating forwards, are there more items?
+	HasNextPage bool `json:"hasNextPage"`
+}
+
+// GetEndCursor returns getOrganizationsSearchSearchResultItemConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionPageInfo) GetEndCursor() string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns getOrganizationsSearchSearchResultItemConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// The query or mutation executed by getOrganizations.
+const getOrganizations_Operation = `
+query getOrganizations ($cursor: String, $query: String!) {
+	search(query: $query, type: USER, first: 100, after: $cursor) {
+		userCount
 		edges {
 			node {
 				__typename
-				... on Repository {
-					owner {
-						__typename
-						login
-					}
+				... on Organization {
+					databaseId
+					login
 					name
-					stargazerCount
+					createdAt
 				}
 			}
+		}
+		pageInfo {
+			endCursor
+			hasNextPage
 		}
 	}
 }
 `
 
-func getRepositories(
+func getOrganizations(
 	ctx context.Context,
 	client graphql.Client,
-) (*getRepositoriesResponse, error) {
+	cursor string,
+	query string,
+) (*getOrganizationsResponse, error) {
 	req := &graphql.Request{
-		OpName: "getRepositories",
-		Query:  getRepositories_Operation,
+		OpName: "getOrganizations",
+		Query:  getOrganizations_Operation,
+		Variables: &__getOrganizationsInput{
+			Cursor: cursor,
+			Query:  query,
+		},
 	}
 	var err error
 
-	var data getRepositoriesResponse
+	var data getOrganizationsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

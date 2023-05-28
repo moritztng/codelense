@@ -1,19 +1,28 @@
-query getRepositories {
-  search(
-    query: "is:public stars:500..1000 sort:stars-asc"
-    type: REPOSITORY
-    first: 100
+query getOrganizations(
+  # @genqlient(omitempty: true)
+  $cursor: String,
+  $query: String!,
   ) {
+  search(
+    query: $query
+    type: USER
+    first: 100
+    after: $cursor
+  ) {
+    userCount
     edges {
       node {
-        ... on Repository {
-          owner {
-              login
-            }
+        ... on Organization {
+          databaseId
+          login
           name
-          stargazerCount
+          createdAt
         }
       }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
     }
   }
 }
