@@ -22,7 +22,7 @@ func main() {
 	producer, _ := kafka.NewProducer(&conf)
 	defer producer.Close()
 	defer consumer.Close()
-	consumer.SubscribeTopics([]string{"github_load_organizations", "api_github_requests"}, nil)
+	consumer.SubscribeTopics([]string{"github_load_organizations", "github_load_events", "api_github_requests"}, nil)
 	for {
 		message, err := consumer.ReadMessage(time.Second)
 		if err == nil {
@@ -33,6 +33,15 @@ func main() {
 				tx, _ := databaseConn.Begin(context.Background())
 				defer tx.Rollback(context.Background())
 				_, err = tx.Exec(context.Background(), "insert into organizations(key, login, name, created) values ($1, $2, $3, $4)", organization.Key, organization.Login, organization.Name, organization.CreatedAt)
+				fmt.Println(err)
+				err = tx.Commit(context.Background())
+				fmt.Println(err)
+			case "github_load_events":
+				var event messaging.Event
+				json.Unmarshal(message.Value, &event)
+				tx, _ := databaseConn.Begin(context.Background())
+				defer tx.Rollback(context.Background())
+				_, err = tx.Exec(context.Background(), "insert into events(key, type, payload, created) values ($1, $2, $3, $4)", event.Key, event.Type, event.Payload, event.CreatedAt)
 				fmt.Println(err)
 				err = tx.Commit(context.Background())
 				fmt.Println(err)

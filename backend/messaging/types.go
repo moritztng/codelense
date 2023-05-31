@@ -24,7 +24,7 @@ type Organization struct {
 }
 
 type Event struct {
-	Key       string
+	Key       int
 	Type      string
 	Payload   json.RawMessage
 	CreatedAt time.Time

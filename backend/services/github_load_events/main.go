@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -43,7 +44,8 @@ func main() {
 					fmt.Println("already loaded")
 					break
 				}
-				eventJson, _ := json.Marshal(messaging.Event{Key: event.GetID(), Type: event.GetType(), Payload: event.GetRawPayload(), CreatedAt: event.GetCreatedAt().Time})
+				key, _ := strconv.Atoi(event.GetID())
+				eventJson, _ := json.Marshal(messaging.Event{Key: key, Type: event.GetType(), Payload: event.GetRawPayload(), CreatedAt: event.GetCreatedAt().Time})
 				producer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 					Value:          eventJson,
