@@ -29,31 +29,32 @@ func main() {
 	client := graphql.NewClient("https://api.github.com/graphql",
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
 	minCreated := "1970-01-01"
-	hasEdges := true
+	createdAfterMin := true
 	total := 0
-	for hasEdges {
+	for createdAfterMin {
+		createdAfterMin = false
 		hasNextPage := true
 		nextPageCursor := ""
-		query := fmt.Sprintf("location:Germany type:org sort:joined-asc created:>%s", minCreated)
+		query := fmt.Sprintf("location:Germany type:org sort:joined-asc created:>=%s", minCreated)
 		for hasNextPage {
 			response, _ := getOrganizations(context.Background(), client, nextPageCursor, query)
 			edges := response.Search.Edges
-			if len(edges) == 0 {
-				hasEdges = false
-				break
-			}
 			for _, edge := range edges {
 				organization := edge.Node.(*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
-				organizationJson, _ := json.Marshal(messaging.Repository{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt})
+				organizationJson, _ := json.Marshal(messaging.Organization{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt})
 				topic := "github_load_organizations"
 				producer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 					Value:          organizationJson,
 				}, nil)
-				minCreated = organization.CreatedAt.Format("2006-01-02")
+				created := organization.CreatedAt.Format("2006-01-02")
+				if created != minCreated {
+					minCreated = created
+					createdAfterMin = true
+					fmt.Println(minCreated)
+				}
 				total += 1
 			}
-			fmt.Println(minCreated)
 			fmt.Println(total)
 			hasNextPage = response.Search.PageInfo.HasNextPage
 			nextPageCursor = response.Search.PageInfo.EndCursor

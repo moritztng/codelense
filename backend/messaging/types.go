@@ -1,6 +1,9 @@
 package messaging
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type ApiGithubRequest struct {
 	Key      string
@@ -10,12 +13,19 @@ type ApiGithubRequest struct {
 
 type GithubStoreResult struct {
 	Key          string
-	Repositories []*Repository
+	Repositories []*Organization
 }
 
-type Repository struct {
+type Organization struct {
 	Key       int
 	Login     string
 	Name      string
+	CreatedAt time.Time
+}
+
+type Event struct {
+	Key       string
+	Type      string
+	Payload   json.RawMessage
 	CreatedAt time.Time
 }
