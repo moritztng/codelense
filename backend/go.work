@@ -1,10 +1,10 @@
 go 1.19
 
 use (
-	./messaging
 	./services/api
-	./services/github_load_organizations
 	./services/github_load_events
+	./services/github_load_organizations
 	./services/github_load_scheduler
 	./services/github_store
+	./util
 )

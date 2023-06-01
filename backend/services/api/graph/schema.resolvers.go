@@ -9,15 +9,15 @@ import (
 	"strconv"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/moritztng/codelense/backend/messaging"
 	"github.com/moritztng/codelense/backend/services/api/graph/model"
+	"github.com/moritztng/codelense/backend/util"
 )
 
 // Organizations is the resolver for the organizations field.
 func (r *queryResolver) Organizations(ctx context.Context, first int) ([]*model.Organization, error) {
 	rows, _ := r.Database.Query(context.Background(), "select key, login, name, created from organizations limit $1", first)
 	defer rows.Close()
-	organizationsDatabase, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[messaging.Organization])
+	organizationsDatabase, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[util.Organization])
 	organizations := make([]*model.Organization, len(organizationsDatabase))
 	for i, organization := range organizationsDatabase {
 		organizations[i] = &model.Organization{Key: strconv.Itoa(organization.Key), Login: organization.Login, Name: organization.Name, Created: organization.CreatedAt.String()}
@@ -29,7 +29,7 @@ func (r *queryResolver) Organizations(ctx context.Context, first int) ([]*model.
 func (r *queryResolver) Events(ctx context.Context, first int) ([]*model.Event, error) {
 	rows, _ := r.Database.Query(context.Background(), "select key, type, payload, created from events limit $1", first)
 	defer rows.Close()
-	eventsDatabase, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[messaging.Event])
+	eventsDatabase, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[util.Event])
 	events := make([]*model.Event, len(eventsDatabase))
 	for i, event := range eventsDatabase {
 		events[i] = &model.Event{Key: strconv.Itoa(event.Key), Type: event.Type, Payload: string(event.Payload), Created: event.CreatedAt.String()}

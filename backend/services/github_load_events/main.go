@@ -11,12 +11,12 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/google/go-github/v52/github"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/moritztng/codelense/backend/messaging"
+	"github.com/moritztng/codelense/backend/util"
 	"golang.org/x/oauth2"
 )
 
 func main() {
-	conf := messaging.ReadConfig("kafka.properties")
+	conf := util.ReadConfig("kafka.properties")
 	producer, _ := kafka.NewProducer(&conf)
 	topic := "github_load_events"
 	ctx := context.Background()
@@ -45,7 +45,7 @@ func main() {
 					break
 				}
 				key, _ := strconv.Atoi(event.GetID())
-				eventJson, _ := json.Marshal(messaging.Event{Key: key, Type: event.GetType(), Payload: event.GetRawPayload(), CreatedAt: event.GetCreatedAt().Time})
+				eventJson, _ := json.Marshal(util.Event{Key: key, Type: event.GetType(), Payload: event.GetRawPayload(), CreatedAt: event.GetCreatedAt().Time})
 				producer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 					Value:          eventJson,

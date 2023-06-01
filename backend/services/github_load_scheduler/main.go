@@ -7,11 +7,11 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/go-co-op/gocron"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/moritztng/codelense/backend/messaging"
+	"github.com/moritztng/codelense/backend/util"
 )
 
 func main() {
-	conf := messaging.ReadConfig("kafka.properties")
+	conf := util.ReadConfig("kafka.properties")
 	producer, _ := kafka.NewProducer(&conf)
 	defer producer.Close()
 	scheduler := gocron.NewScheduler(time.UTC)

@@ -10,14 +10,14 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/jackc/pgx/v5"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/moritztng/codelense/backend/messaging"
+	"github.com/moritztng/codelense/backend/util"
 )
 
 func main() {
 	databaseUrl := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
 	databaseConn, _ := pgx.Connect(context.Background(), databaseUrl)
 	defer databaseConn.Close(context.Background())
-	conf := messaging.ReadConfig("kafka.properties")
+	conf := util.ReadConfig("kafka.properties")
 	consumer, _ := kafka.NewConsumer(&conf)
 	producer, _ := kafka.NewProducer(&conf)
 	defer producer.Close()
@@ -28,7 +28,7 @@ func main() {
 		if err == nil {
 			switch *message.TopicPartition.Topic {
 			case "github_load_organizations":
-				var organization messaging.Organization
+				var organization util.Organization
 				json.Unmarshal(message.Value, &organization)
 				tx, _ := databaseConn.Begin(context.Background())
 				defer tx.Rollback(context.Background())
@@ -37,7 +37,7 @@ func main() {
 				err = tx.Commit(context.Background())
 				fmt.Println(err)
 			case "github_load_events":
-				var event messaging.Event
+				var event util.Event
 				json.Unmarshal(message.Value, &event)
 				tx, _ := databaseConn.Begin(context.Background())
 				defer tx.Rollback(context.Background())

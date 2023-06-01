@@ -10,7 +10,7 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/moritztng/codelense/backend/messaging"
+	"github.com/moritztng/codelense/backend/util"
 )
 
 type authedTransport struct {
@@ -24,7 +24,7 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func main() {
-	conf := messaging.ReadConfig("kafka.properties")
+	conf := util.ReadConfig("kafka.properties")
 	producer, _ := kafka.NewProducer(&conf)
 	client := graphql.NewClient("https://api.github.com/graphql",
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
@@ -47,7 +47,7 @@ func main() {
 				if exists {
 					continue
 				}
-				organizationJson, _ := json.Marshal(messaging.Organization{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt})
+				organizationJson, _ := json.Marshal(util.Organization{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt})
 				topic := "github_load_organizations"
 				producer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},

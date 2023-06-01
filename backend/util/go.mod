@@ -1,4 +1,4 @@
-module github.com/moritztng/codelense/backend/messaging
+module github.com/moritztng/codelense/backend/util
 
 go 1.19
 
