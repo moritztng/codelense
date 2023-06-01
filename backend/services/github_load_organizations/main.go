@@ -30,8 +30,10 @@ func main() {
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
 	minCreated := "1970-01-01"
 	createdAfterMin := true
+	var lastKeys map[int]struct{}
 	total := 0
 	for createdAfterMin {
+		keys := map[int]struct{}{}
 		createdAfterMin = false
 		hasNextPage := true
 		nextPageCursor := ""
@@ -41,6 +43,10 @@ func main() {
 			edges := response.Search.Edges
 			for _, edge := range edges {
 				organization := edge.Node.(*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
+				_, exists := lastKeys[organization.DatabaseId]
+				if exists {
+					continue
+				}
 				organizationJson, _ := json.Marshal(messaging.Organization{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt})
 				topic := "github_load_organizations"
 				producer.Produce(&kafka.Message{
@@ -53,12 +59,14 @@ func main() {
 					createdAfterMin = true
 					fmt.Println(minCreated)
 				}
+				keys[organization.DatabaseId] = struct{}{}
 				total += 1
 			}
 			fmt.Println(total)
 			hasNextPage = response.Search.PageInfo.HasNextPage
 			nextPageCursor = response.Search.PageInfo.EndCursor
 		}
+		lastKeys = keys
 	}
 	producer.Flush(15 * 1000)
 	producer.Close()

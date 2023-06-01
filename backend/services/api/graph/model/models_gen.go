@@ -2,12 +2,16 @@
 
 package model
 
-type Repositories struct {
-	Repositories []*Repository `json:"repositories"`
+type Event struct {
+	Key     string `json:"key"`
+	Type    string `json:"type"`
+	Payload string `json:"payload"`
+	Created string `json:"created"`
 }
 
-type Repository struct {
-	Owner string `json:"owner"`
-	Name  string `json:"name"`
-	Stars int    `json:"stars"`
+type Organization struct {
+	Key     string `json:"key"`
+	Login   string `json:"login"`
+	Name    string `json:"name"`
+	Created string `json:"created"`
 }

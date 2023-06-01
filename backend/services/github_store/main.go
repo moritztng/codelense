@@ -22,7 +22,7 @@ func main() {
 	producer, _ := kafka.NewProducer(&conf)
 	defer producer.Close()
 	defer consumer.Close()
-	consumer.SubscribeTopics([]string{"github_load_organizations", "github_load_events", "api_github_requests"}, nil)
+	consumer.SubscribeTopics([]string{"github_load_organizations", "github_load_events"}, nil)
 	for {
 		message, err := consumer.ReadMessage(time.Second)
 		if err == nil {
@@ -45,18 +45,6 @@ func main() {
 				fmt.Println(err)
 				err = tx.Commit(context.Background())
 				fmt.Println(err)
-				/*case "api_github_requests":
-				var request messaging.ApiGithubRequest
-				json.Unmarshal(message.Value, &request)
-				rows, _ := databaseConn.Query(context.Background(), "select key, login, name, created from organizations where stars<=$1 order by stars desc limit $2", request.MaxStars, request.First)
-				defer rows.Close()
-				repositories, _ := pgx.CollectRows(rows, pgx.RowToAddrOfStructByPos[messaging.Repository])
-				result, _ := json.Marshal(messaging.GithubStoreResult{Key: request.Key, Repositories: repositories})
-				produceTopic := "github_store_results"
-				producer.Produce(&kafka.Message{
-					TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
-					Value:          result,
-				}, nil)*/
 			}
 		} else {
 			fmt.Println(err)

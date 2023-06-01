@@ -2,16 +2,21 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Repositories {
-  repositories: [Repository]!
+type Organization {
+  key: ID!
+  login: String!
+  name: String!
+  created: String!
 }
 
-type Repository {
-  owner: String!
-  name: String!
-  stars: Int!
+type Event {
+  key: ID!
+  type: String!
+  payload: String!
+  created: String!
 }
 
 type Query {
-  repositories(maxStars: Int!, first: Int!): Repositories!
+  organizations(first: Int!): [Organization]!
+  events(first: Int!): [Event]!
 }

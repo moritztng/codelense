@@ -3,7 +3,7 @@ package graph
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/jackc/pgx/v5"
 )
 
 // This file will not be regenerated automatically.
@@ -11,6 +11,5 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Consumer *kafka.Consumer
-	Producer *kafka.Producer
+	Database *pgx.Conn
 }
