@@ -11,10 +11,22 @@ import (
 	"github.com/Khan/genqlient/graphql"
 )
 
+// The possible roles within an organization for its members.
+type OrganizationMemberRole string
+
+const (
+	// The user is an administrator of the organization.
+	OrganizationMemberRoleAdmin OrganizationMemberRole = "ADMIN"
+	// The user is a member of the organization.
+	OrganizationMemberRoleMember OrganizationMemberRole = "MEMBER"
+)
+
 // __getOrganizationsInput is used internally by genqlient
 type __getOrganizationsInput struct {
-	Cursor string `json:"cursor,omitempty"`
-	Query  string `json:"query"`
+	Cursor            string `json:"cursor,omitempty"`
+	Query             string `json:"query"`
+	FirstMembers      int    `json:"firstMembers"`
+	FirstRepositories int    `json:"firstRepositories"`
 }
 
 // GetCursor returns __getOrganizationsInput.Cursor, and is useful for accessing the field via an interface.
@@ -22,6 +34,12 @@ func (v *__getOrganizationsInput) GetCursor() string { return v.Cursor }
 
 // GetQuery returns __getOrganizationsInput.Query, and is useful for accessing the field via an interface.
 func (v *__getOrganizationsInput) GetQuery() string { return v.Query }
+
+// GetFirstMembers returns __getOrganizationsInput.FirstMembers, and is useful for accessing the field via an interface.
+func (v *__getOrganizationsInput) GetFirstMembers() int { return v.FirstMembers }
+
+// GetFirstRepositories returns __getOrganizationsInput.FirstRepositories, and is useful for accessing the field via an interface.
+func (v *__getOrganizationsInput) GetFirstRepositories() int { return v.FirstRepositories }
 
 // getOrganizationsResponse is returned by getOrganizations on success.
 type getOrganizationsResponse struct {
@@ -202,10 +220,28 @@ type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNo
 	DatabaseId int `json:"databaseId"`
 	// The organization's login name.
 	Login string `json:"login"`
+	// The organization's public email.
+	Email string `json:"email"`
 	// The organization's public profile name.
 	Name string `json:"name"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
+	// A URL pointing to the organization's public avatar.
+	AvatarUrl string `json:"avatarUrl"`
+	// The organization's public profile description.
+	Description string `json:"description"`
+	// A list of users who are members of this organization.
+	MembersWithRole getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnection `json:"membersWithRole"`
+	// A list of repositories that the user owns.
+	Repositories getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnection `json:"repositories"`
+	// The organization's Twitter username.
+	TwitterUsername string `json:"twitterUsername"`
+	// Identifies the date and time when the object was last updated.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The organization's public profile URL.
+	WebsiteUrl string `json:"websiteUrl"`
+	// The HTTP URL for this organization.
+	Url string `json:"url"`
 }
 
 // GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Typename, and is useful for accessing the field via an interface.
@@ -223,6 +259,11 @@ func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEd
 	return v.Login
 }
 
+// GetEmail returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Email, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetEmail() string {
+	return v.Email
+}
+
 // GetName returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Name, and is useful for accessing the field via an interface.
 func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetName() string {
 	return v.Name
@@ -231,6 +272,170 @@ func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEd
 // GetCreatedAt returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.CreatedAt, and is useful for accessing the field via an interface.
 func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetCreatedAt() time.Time {
 	return v.CreatedAt
+}
+
+// GetAvatarUrl returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetAvatarUrl() string {
+	return v.AvatarUrl
+}
+
+// GetDescription returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Description, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetDescription() string {
+	return v.Description
+}
+
+// GetMembersWithRole returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.MembersWithRole, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetMembersWithRole() getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnection {
+	return v.MembersWithRole
+}
+
+// GetRepositories returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Repositories, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetRepositories() getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnection {
+	return v.Repositories
+}
+
+// GetTwitterUsername returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.TwitterUsername, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetTwitterUsername() string {
+	return v.TwitterUsername
+}
+
+// GetUpdatedAt returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetUpdatedAt() time.Time {
+	return v.UpdatedAt
+}
+
+// GetWebsiteUrl returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.WebsiteUrl, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetWebsiteUrl() string {
+	return v.WebsiteUrl
+}
+
+// GetUrl returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Url, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetUrl() string {
+	return v.Url
+}
+
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnection includes the requested fields of the GraphQL type OrganizationMemberConnection.
+// The GraphQL type's documentation follows.
+//
+// The connection type for User.
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnection struct {
+	// Identifies the total count of items in the connection.
+	TotalCount int `json:"totalCount"`
+	// A list of edges.
+	Edges []getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdge `json:"edges"`
+}
+
+// GetTotalCount returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnection.Edges, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnection) GetEdges() []getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdge {
+	return v.Edges
+}
+
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdge includes the requested fields of the GraphQL type OrganizationMemberEdge.
+// The GraphQL type's documentation follows.
+//
+// Represents a user within an organization.
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdge struct {
+	// The role this user has in the organization.
+	Role OrganizationMemberRole `json:"role"`
+	// The item at the end of the edge.
+	Node getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdgeNodeUser `json:"node"`
+}
+
+// GetRole returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdge.Role, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdge) GetRole() OrganizationMemberRole {
+	return v.Role
+}
+
+// GetNode returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdge.Node, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdge) GetNode() getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdgeNodeUser {
+	return v.Node
+}
+
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdgeNodeUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user is an individual's account on GitHub that owns repositories and can make new content.
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdgeNodeUser struct {
+	Id string `json:"id"`
+	// The username used to login.
+	Login string `json:"login"`
+}
+
+// GetId returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdgeNodeUser.Id, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdgeNodeUser) GetId() string {
+	return v.Id
+}
+
+// GetLogin returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdgeNodeUser.Login, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationMembersWithRoleOrganizationMemberConnectionEdgesOrganizationMemberEdgeNodeUser) GetLogin() string {
+	return v.Login
+}
+
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnection includes the requested fields of the GraphQL type RepositoryConnection.
+// The GraphQL type's documentation follows.
+//
+// A list of repositories owned by the subject.
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnection struct {
+	// Identifies the total count of items in the connection.
+	TotalCount int `json:"totalCount"`
+	// A list of edges.
+	Edges []getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdge `json:"edges"`
+}
+
+// GetTotalCount returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnection.Edges, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnection) GetEdges() []getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdge {
+	return v.Edges
+}
+
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdge includes the requested fields of the GraphQL type RepositoryEdge.
+// The GraphQL type's documentation follows.
+//
+// An edge in a connection.
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdge struct {
+	// The item at the end of the edge.
+	Node getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository `json:"node"`
+}
+
+// GetNode returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdge.Node, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdge) GetNode() getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository {
+	return v.Node
+}
+
+// getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository includes the requested fields of the GraphQL type Repository.
+// The GraphQL type's documentation follows.
+//
+// A repository contains the content for a project.
+type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository struct {
+	Id string `json:"id"`
+	// The name of the repository.
+	Name string `json:"name"`
+	// Returns a count of how many stargazers there are on this object
+	StargazerCount int `json:"stargazerCount"`
+}
+
+// GetId returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository.Id, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository) GetId() string {
+	return v.Id
+}
+
+// GetName returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository.Name, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository) GetName() string {
+	return v.Name
+}
+
+// GetStargazerCount returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository.StargazerCount, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganizationRepositoriesRepositoryConnectionEdgesRepositoryEdgeNodeRepository) GetStargazerCount() int {
+	return v.StargazerCount
 }
 
 // getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest includes the requested fields of the GraphQL type PullRequest.
@@ -455,7 +660,7 @@ func (v *getOrganizationsSearchSearchResultItemConnectionPageInfo) GetHasNextPag
 
 // The query or mutation executed by getOrganizations.
 const getOrganizations_Operation = `
-query getOrganizations ($cursor: String, $query: String!) {
+query getOrganizations ($cursor: String, $query: String!, $firstMembers: Int!, $firstRepositories: Int!) {
 	search(query: $query, type: USER, first: 100, after: $cursor) {
 		userCount
 		edges {
@@ -464,8 +669,35 @@ query getOrganizations ($cursor: String, $query: String!) {
 				... on Organization {
 					databaseId
 					login
+					email
 					name
 					createdAt
+					avatarUrl
+					description
+					membersWithRole(first: $firstMembers) {
+						totalCount
+						edges {
+							role
+							node {
+								id
+								login
+							}
+						}
+					}
+					repositories(first: $firstRepositories) {
+						totalCount
+						edges {
+							node {
+								id
+								name
+								stargazerCount
+							}
+						}
+					}
+					twitterUsername
+					updatedAt
+					websiteUrl
+					url
 				}
 			}
 		}
@@ -482,13 +714,17 @@ func getOrganizations(
 	client graphql.Client,
 	cursor string,
 	query string,
+	firstMembers int,
+	firstRepositories int,
 ) (*getOrganizationsResponse, error) {
 	req := &graphql.Request{
 		OpName: "getOrganizations",
 		Query:  getOrganizations_Operation,
 		Variables: &__getOrganizationsInput{
-			Cursor: cursor,
-			Query:  query,
+			Cursor:            cursor,
+			Query:             query,
+			FirstMembers:      firstMembers,
+			FirstRepositories: firstRepositories,
 		},
 	}
 	var err error

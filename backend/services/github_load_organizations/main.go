@@ -39,7 +39,7 @@ func main() {
 		nextPageCursor := ""
 		query := fmt.Sprintf("location:Germany type:org sort:joined-asc created:>=%s", minCreated)
 		for hasNextPage {
-			response, _ := getOrganizations(context.Background(), client, nextPageCursor, query)
+			response, _ := getOrganizations(context.Background(), client, nextPageCursor, query, 0, 0)
 			edges := response.Search.Edges
 			for _, edge := range edges {
 				organization := edge.Node.(*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
@@ -47,7 +47,7 @@ func main() {
 				if exists {
 					continue
 				}
-				organizationJson, _ := json.Marshal(util.Organization{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt})
+				organizationJson, _ := json.Marshal(util.Organization{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt, Email: organization.Email, AvatarUrl: organization.AvatarUrl, Description: organization.Description, MembersCount: organization.MembersWithRole.TotalCount, RepositoriesCount: organization.Repositories.TotalCount, TwitterUsername: organization.TwitterUsername, UpdatedAt: organization.UpdatedAt, WebsiteUrl: organization.WebsiteUrl, Url: organization.Url})
 				topic := "github_load_organizations"
 				producer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},

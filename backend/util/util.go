@@ -23,17 +23,41 @@ type GithubStoreResult struct {
 }
 
 type Organization struct {
-	Key       int
-	Login     string
-	Name      string
-	CreatedAt time.Time
+	Key               int
+	Login             string
+	Name              string
+	Email             string
+	Description       string
+	MembersCount      int
+	RepositoriesCount int
+	TwitterUsername   string
+	WebsiteUrl        string
+	Url               string
+	AvatarUrl         string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+type User struct {
+	Key   int
+	Login string
+}
+
+type Repository struct {
+	Key        int
+	Name       string
+	StarsCount int
 }
 
 type Event struct {
-	Key       int
-	Type      string
-	Payload   json.RawMessage
-	CreatedAt time.Time
+	Key          int
+	Type         string
+	ActorId      int
+	OrgId        int
+	RepositoryId int
+	Payload      json.RawMessage
+	Public       bool
+	CreatedAt    time.Time
 }
 
 func ReadConfig(configFile string) kafka.ConfigMap {
