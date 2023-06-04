@@ -10,7 +10,7 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/moritztng/codelense/backend/util"
+	"github.com/moritztng/codelense/backend/model"
 )
 
 type authedTransport struct {
@@ -24,9 +24,8 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func main() {
-	conf := util.ReadConfig("kafka.properties")
-	producer, _ := kafka.NewProducer(&conf)
-	client := graphql.NewClient("https://api.github.com/graphql",
+	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	graphqlClient := graphql.NewClient("https://api.github.com/graphql",
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
 	minCreated := "1970-01-01"
 	createdAfterMin := true
@@ -39,7 +38,7 @@ func main() {
 		nextPageCursor := ""
 		query := fmt.Sprintf("location:Germany type:org sort:joined-asc created:>=%s", minCreated)
 		for hasNextPage {
-			response, _ := getOrganizations(context.Background(), client, nextPageCursor, query, 0, 0)
+			response, _ := getOrganizations(context.Background(), graphqlClient, nextPageCursor, query)
 			edges := response.Search.Edges
 			for _, edge := range edges {
 				organization := edge.Node.(*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
@@ -47,17 +46,16 @@ func main() {
 				if exists {
 					continue
 				}
-				organizationJson, _ := json.Marshal(util.Organization{Key: organization.DatabaseId, Login: organization.Login, Name: organization.Name, CreatedAt: organization.CreatedAt, Email: organization.Email, AvatarUrl: organization.AvatarUrl, Description: organization.Description, MembersCount: organization.MembersWithRole.TotalCount, RepositoriesCount: organization.Repositories.TotalCount, TwitterUsername: organization.TwitterUsername, UpdatedAt: organization.UpdatedAt, WebsiteUrl: organization.WebsiteUrl, Url: organization.Url})
+				organizationEventJson, _ := json.Marshal(model.OrganizationEvent{Organization: model.Organization{GithubID: uint(organization.DatabaseId), Login: organization.Login, Name: organization.Name, GithubCreatedAt: organization.CreatedAt, Email: organization.Email, AvatarUrl: organization.AvatarUrl, Description: organization.Description, TwitterUsername: organization.TwitterUsername, GithubUpdatedAt: organization.UpdatedAt, WebsiteUrl: organization.WebsiteUrl, Url: organization.Url}})
 				topic := "github_load_organizations"
-				producer.Produce(&kafka.Message{
+				kafkaProducer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-					Value:          organizationJson,
+					Value:          organizationEventJson,
 				}, nil)
 				created := organization.CreatedAt.Format("2006-01-02")
 				if created != minCreated {
 					minCreated = created
 					createdAfterMin = true
-					fmt.Println(minCreated)
 				}
 				keys[organization.DatabaseId] = struct{}{}
 				total += 1
@@ -68,8 +66,8 @@ func main() {
 		}
 		lastKeys = keys
 	}
-	producer.Flush(15 * 1000)
-	producer.Close()
+	kafkaProducer.Flush(15 * 1000)
+	kafkaProducer.Close()
 }
 
 //go:generate go run github.com/Khan/genqlient

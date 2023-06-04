@@ -2,16 +2,41 @@
 
 package model
 
+import (
+	"time"
+)
+
 type Event struct {
-	Key     string `json:"key"`
-	Type    string `json:"type"`
-	Payload string `json:"payload"`
-	Created string `json:"created"`
+	ID              string     `json:"id"`
+	CreatedAt       time.Time  `json:"createdAt"`
+	UpdatedAt       *time.Time `json:"updatedAt,omitempty"`
+	GithubID        string     `json:"GithubID"`
+	Type            string     `json:"Type"`
+	ActorID         *string    `json:"ActorId,omitempty"`
+	OrgID           *string    `json:"OrgId,omitempty"`
+	RepositoryID    *string    `json:"RepositoryId,omitempty"`
+	Payload         string     `json:"Payload"`
+	Public          *bool      `json:"Public,omitempty"`
+	GithubCreatedAt time.Time  `json:"GithubCreatedAt"`
 }
 
 type Organization struct {
-	Key     string `json:"key"`
-	Login   string `json:"login"`
-	Name    string `json:"name"`
-	Created string `json:"created"`
+	GithubID        string     `json:"GithubID"`
+	Login           string     `json:"Login"`
+	Name            string     `json:"Name"`
+	Email           *string    `json:"Email,omitempty"`
+	Description     *string    `json:"Description,omitempty"`
+	TwitterUsername *string    `json:"TwitterUsername,omitempty"`
+	WebsiteURL      *string    `json:"WebsiteUrl,omitempty"`
+	URL             *string    `json:"Url,omitempty"`
+	AvatarURL       *string    `json:"AvatarUrl,omitempty"`
+	GithubCreatedAt time.Time  `json:"GithubCreatedAt"`
+	GithubUpdatedAt *time.Time `json:"GithubUpdatedAt,omitempty"`
+}
+
+type OrganizationEvent struct {
+	ID           string        `json:"id"`
+	CreatedAt    time.Time     `json:"createdAt"`
+	UpdatedAt    *time.Time    `json:"updatedAt,omitempty"`
+	Organization *Organization `json:"organization,omitempty"`
 }

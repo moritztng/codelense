@@ -7,12 +7,10 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/go-co-op/gocron"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/moritztng/codelense/backend/util"
 )
 
 func main() {
-	conf := util.ReadConfig("kafka.properties")
-	producer, _ := kafka.NewProducer(&conf)
+	producer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
 	defer producer.Close()
 	scheduler := gocron.NewScheduler(time.UTC)
 	scheduler.Cron(os.Getenv("CRON")).Do(func() {

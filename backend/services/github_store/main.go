@@ -1,50 +1,45 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/jackc/pgx/v5"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/moritztng/codelense/backend/util"
+	"github.com/moritztng/codelense/backend/model"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
-	databaseUrl := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
-	databaseConn, _ := pgx.Connect(context.Background(), databaseUrl)
-	defer databaseConn.Close(context.Background())
-	conf := util.ReadConfig("kafka.properties")
-	consumer, _ := kafka.NewConsumer(&conf)
-	producer, _ := kafka.NewProducer(&conf)
-	defer producer.Close()
-	defer consumer.Close()
-	consumer.SubscribeTopics([]string{"github_load_organizations", "github_load_events"}, nil)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s", os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE"))
+	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	database.AutoMigrate(&model.Event{}, &model.OrganizationEvent{})
+	kafkaConfig := kafka.ConfigMap{
+		"bootstrap.servers": "localhost:9092",
+		"group.id":          "github_store",
+		"auto.offset.reset": "earliest",
+	}
+	kafkaConsumer, _ := kafka.NewConsumer(&kafkaConfig)
+	defer kafkaConsumer.Close()
+	kafkaConsumer.SubscribeTopics([]string{"github_load_organizations", "github_load_events"}, nil)
 	for {
-		message, err := consumer.ReadMessage(time.Second)
+		message, err := kafkaConsumer.ReadMessage(time.Second)
 		if err == nil {
 			switch *message.TopicPartition.Topic {
 			case "github_load_organizations":
-				var organization util.Organization
-				json.Unmarshal(message.Value, &organization)
-				tx, _ := databaseConn.Begin(context.Background())
-				defer tx.Rollback(context.Background())
-				_, err = tx.Exec(context.Background(), "insert into organizations(key, login, name, email, description, members_count, repositories_count, twitter_username, website_url, url, avatar_url, created, updated) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", organization.Key, organization.Login, organization.Name, organization.Email, organization.Description, organization.MembersCount, organization.RepositoriesCount, organization.TwitterUsername, organization.WebsiteUrl, organization.Url, organization.AvatarUrl, organization.CreatedAt, organization.UpdatedAt)
-				fmt.Println(err)
-				err = tx.Commit(context.Background())
-				fmt.Println(err)
+				var organizationEvent model.OrganizationEvent
+				json.Unmarshal(message.Value, &organizationEvent)
+				database.Create(&organizationEvent)
 			case "github_load_events":
-				var event util.Event
+				var event model.Event
 				json.Unmarshal(message.Value, &event)
-				tx, _ := databaseConn.Begin(context.Background())
-				defer tx.Rollback(context.Background())
-				_, err = tx.Exec(context.Background(), "insert into events(key, type, actor_id, org_id, repository_id, payload, public, created_at) values ($1, $2, $3, $4, $5, $6, $7, $8)", event.Key, event.Type, event.ActorId, event.OrgId, event.RepositoryId, event.Payload, event.Public, event.CreatedAt)
-				fmt.Println(err)
-				err = tx.Commit(context.Background())
-				fmt.Println(err)
+				database.Create(&event)
 			}
 		} else {
 			fmt.Println(err)

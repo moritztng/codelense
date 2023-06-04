@@ -2,21 +2,44 @@
 #
 # https://gqlgen.com/getting-started/
 
+scalar Time
+
 type Organization {
-  key: ID!
-  login: String!
-  name: String!
-  created: String!
+	GithubID:        ID!
+	Login:           String!
+	Name:            String!
+	Email:           String
+	Description:     String
+	TwitterUsername: String
+	WebsiteUrl:      String
+	Url:             String
+	AvatarUrl:       String
+	GithubCreatedAt: Time!
+	GithubUpdatedAt: Time
+}
+
+type OrganizationEvent {
+  id: ID!
+  createdAt: Time!
+  updatedAt: Time
+  organization: Organization
 }
 
 type Event {
-  key: ID!
-  type: String!
-  payload: String!
-  created: String!
+  id: ID!
+  createdAt: Time!
+  updatedAt: Time
+  GithubID:        ID!
+	Type:            String!
+	ActorId:         ID
+	OrgId:           ID
+	RepositoryId:    ID
+	Payload:         String!
+	Public:          Boolean
+	GithubCreatedAt: Time!
 }
 
 type Query {
-  organizations(first: Int!): [Organization]!
+  organizationEvents(first: Int!): [OrganizationEvent]!
   events(first: Int!): [Event]!
 }

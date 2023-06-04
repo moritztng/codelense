@@ -1,23 +1,56 @@
-# Use postgres/example user/password credentials
 version: '3.1'
 
 services:
 
-  # api:
-  #   build: ./services/api
-  #   environment:
-  #     PORT: 8080
-  #   ports:
-  #     - 5000:8080
+  api:
+    build: ./services/api
+    ports:
+      - ${API_PORT_INTERN}:${API_PORT_EXTERN}
+    environment:
+      - PORT: ${API_PORT_INTERN}
+      - DB_USER: ${DB_USER}
+      - DB_PASSWORD: ${DB_PASSWORD}
+      - DB_HOST: ${DB_HOST}
+      - DB_PORT: ${DB_PORT}
+      - DB_NAME: ${DB_NAME}
+      - DB_TIMEZONE: ${DB_TIMEZONE}
+
+  github_store:
+    build: ./services/github_store
+    environment:
+      - DB_USER: ${DB_USER}
+      - DB_PASSWORD: ${DB_PASSWORD}
+      - DB_HOST: ${DB_HOST}
+      - DB_PORT: ${DB_PORT}
+      - DB_NAME: ${DB_NAME}
+      - DB_TIMEZONE: ${DB_TIMEZONE}
+    depends_on:
+     - broker
+     - github_database
+
+  github_load_events:
+    build: ./services/github_load_events
+    environment:
+      - GITHUB_TOKEN: ${GITHUB_TOKEN}
+      - GITHUB_LOAD_EVENTS_INTERVAL: ${GITHUB_LOAD_EVENTS_INTERVAL}
+    depends_on:
+     - broker
+  
+  github_load_organizations:
+    build: ./services/github_load_organizations
+    environment:
+      - GITHUB_TOKEN: ${GITHUB_TOKEN}
+    depends_on:
+    - broker
 
   github_database:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_DB: github
-      POSTGRES_PASSWORD: adastra
-      PGPORT: 5001
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGPORT: ${DB_PORT}
       PGDATA: /var/lib/postgresql/data
     ports:
       - 5001:5001

@@ -2,8 +2,6 @@ query getOrganizations(
   # @genqlient(omitempty: true)
   $cursor: String,
   $query: String!,
-  $firstMembers: Int!,
-  $firstRepositories: Int!
   ) {
   search(
     query: $query
@@ -22,26 +20,6 @@ query getOrganizations(
           createdAt
           avatarUrl
           description
-          membersWithRole (first: $firstMembers){
-            totalCount
-            edges {
-              role
-              node {
-                id
-                login
-              }
-            }
-          }
-          repositories(first: $firstRepositories) {
-            totalCount
-            edges {
-              node {
-                id
-                name
-                stargazerCount
-              }
-            }
-          }
           twitterUsername
           updatedAt
           websiteUrl

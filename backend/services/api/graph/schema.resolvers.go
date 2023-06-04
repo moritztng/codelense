@@ -8,33 +8,35 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/jackc/pgx/v5"
+	dataModel "github.com/moritztng/codelense/backend/model"
 	"github.com/moritztng/codelense/backend/services/api/graph/model"
-	"github.com/moritztng/codelense/backend/util"
 )
 
-// Organizations is the resolver for the organizations field.
-func (r *queryResolver) Organizations(ctx context.Context, first int) ([]*model.Organization, error) {
-	rows, _ := r.Database.Query(context.Background(), "select key, login, name, created from organizations limit $1", first)
-	defer rows.Close()
-	organizationsDatabase, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[util.Organization])
-	organizations := make([]*model.Organization, len(organizationsDatabase))
-	for i, organization := range organizationsDatabase {
-		organizations[i] = &model.Organization{Key: strconv.Itoa(organization.Key), Login: organization.Login, Name: organization.Name, Created: organization.CreatedAt.String()}
+// OrganizationEvents is the resolver for the organizationEvents field.
+func (r *queryResolver) OrganizationEvents(ctx context.Context, first int) ([]*model.OrganizationEvent, error) {
+	organizationEvents := make([]dataModel.OrganizationEvent, first)
+	r.Database.Limit(first).Find(&organizationEvents)
+	response := make([]*model.OrganizationEvent, len(organizationEvents))
+	for i := range organizationEvents {
+		organizationEvent := organizationEvents[i]
+		response[i] = &model.OrganizationEvent{ID: strconv.Itoa(int(organizationEvent.Model.ID)), CreatedAt: organizationEvent.CreatedAt, UpdatedAt: &organizationEvent.UpdatedAt, Organization: &model.Organization{GithubID: strconv.Itoa(int(organizationEvent.Organization.GithubID)), Login: organizationEvent.Organization.Login, Name: organizationEvent.Organization.Name, Email: &organizationEvent.Organization.Email, Description: &organizationEvent.Organization.Description, TwitterUsername: &organizationEvent.Organization.TwitterUsername, WebsiteURL: &organizationEvent.Organization.WebsiteUrl, URL: &organizationEvent.Organization.Url, AvatarURL: &organizationEvent.Organization.AvatarUrl, GithubCreatedAt: organizationEvent.Organization.GithubCreatedAt, GithubUpdatedAt: &organizationEvent.Organization.GithubUpdatedAt}}
 	}
-	return organizations, nil
+	return response, nil
 }
 
 // Events is the resolver for the events field.
 func (r *queryResolver) Events(ctx context.Context, first int) ([]*model.Event, error) {
-	rows, _ := r.Database.Query(context.Background(), "select key, type, payload, created from events limit $1", first)
-	defer rows.Close()
-	eventsDatabase, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[util.Event])
-	events := make([]*model.Event, len(eventsDatabase))
-	for i, event := range eventsDatabase {
-		events[i] = &model.Event{Key: strconv.Itoa(event.Key), Type: event.Type, Payload: string(event.Payload), Created: event.CreatedAt.String()}
+	events := make([]dataModel.Event, first)
+	r.Database.Limit(first).Find(&events)
+	response := make([]*model.Event, len(events))
+	for i := range events {
+		event := events[i]
+		actorID := strconv.Itoa(int(event.ActorID))
+		orgID := strconv.Itoa(int(event.OrgID))
+		repositoryID := strconv.Itoa(int(event.RepositoryID))
+		response[i] = &model.Event{ID: strconv.Itoa(int(event.Model.ID)), CreatedAt: event.CreatedAt, UpdatedAt: &event.UpdatedAt, GithubID: strconv.Itoa(int(event.GithubID)), Type: event.Type, ActorID: &actorID, OrgID: &orgID, RepositoryID: &repositoryID, Payload: event.Payload.String(), Public: &event.Public, GithubCreatedAt: event.GithubCreatedAt}
 	}
-	return events, nil
+	return response, nil
 }
 
 // Query returns QueryResolver implementation.

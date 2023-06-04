@@ -11,13 +11,13 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/google/go-github/v52/github"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/moritztng/codelense/backend/util"
+	"github.com/moritztng/codelense/backend/model"
 	"golang.org/x/oauth2"
+	"gorm.io/datatypes"
 )
 
 func main() {
-	conf := util.ReadConfig("kafka.properties")
-	producer, _ := kafka.NewProducer(&conf)
+	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
 	topic := "github_load_events"
 	ctx := context.Background()
 	token := oauth2.StaticTokenSource(
@@ -44,9 +44,9 @@ func main() {
 					fmt.Println("already loaded")
 					break
 				}
-				key, _ := strconv.Atoi(event.GetID())
-				eventJson, _ := json.Marshal(util.Event{Key: key, Type: event.GetType(), ActorId: int(event.GetActor().GetID()), OrgId: int(event.GetOrg().GetID()), RepositoryId: int(event.GetRepo().GetID()), Payload: event.GetRawPayload(), CreatedAt: event.GetCreatedAt().Time})
-				producer.Produce(&kafka.Message{
+				id, _ := strconv.Atoi(event.GetID())
+				eventJson, _ := json.Marshal(model.Event{GithubID: uint(id), Type: event.GetType(), ActorID: uint(event.GetActor().GetID()), OrgID: uint(event.GetOrg().GetID()), RepositoryID: uint(event.GetRepo().GetID()), Payload: datatypes.JSON(event.GetRawPayload()), GithubCreatedAt: event.GetCreatedAt().Time})
+				kafkaProducer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 					Value:          eventJson,
 				}, nil)
@@ -59,8 +59,6 @@ func main() {
 			return
 		}
 	}
-	producer.Flush(15 * 1000)
-	producer.Close()
+	kafkaProducer.Flush(15 * 1000)
+	kafkaProducer.Close()
 }
-
-//go:generate go run github.com/Khan/genqlient
