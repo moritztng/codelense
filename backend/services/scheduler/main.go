@@ -15,7 +15,7 @@ func main() {
 	defer producer.Close()
 	scheduler := gocron.NewScheduler(time.UTC)
 	scheduler.Cron(os.Getenv("CRON")).Do(func() {
-		produceTopic := "github_load_scheduler"
+		produceTopic := fmt.Sprintf("scheduler_%s", os.Getenv("NAME"))
 		producer.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
 		}, nil)

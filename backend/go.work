@@ -5,6 +5,6 @@ use (
 	./services/api
 	./services/github_load_events
 	./services/github_load_organizations
-	./services/github_load_scheduler
+	./services/scheduler
 	./services/github_store
 )
