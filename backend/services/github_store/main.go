@@ -21,7 +21,7 @@ func main() {
 	}
 	database.AutoMigrate(&model.Event{}, &model.OrganizationEvent{})
 	kafkaConfig := kafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
+		"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT")),
 		"group.id":          "github_store",
 		"auto.offset.reset": "earliest",
 	}

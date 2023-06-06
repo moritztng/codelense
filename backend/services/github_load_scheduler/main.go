@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func main() {
-	producer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	producer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT"))})
 	defer producer.Close()
 	scheduler := gocron.NewScheduler(time.UTC)
 	scheduler.Cron(os.Getenv("CRON")).Do(func() {

@@ -24,7 +24,7 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func main() {
-	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT"))})
 	graphqlClient := graphql.NewClient("https://api.github.com/graphql",
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
 	minCreated := "1970-01-01"

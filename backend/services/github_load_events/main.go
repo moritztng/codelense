@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT"))})
 	topic := "github_load_events"
 	ctx := context.Background()
 	token := oauth2.StaticTokenSource(
