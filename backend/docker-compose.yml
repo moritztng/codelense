@@ -14,9 +14,15 @@ services:
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
       DB_TIMEZONE: ${DB_TIMEZONE}
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
     depends_on:
       github_database:
         condition: service_healthy
+      loki:
+        condition: service_started
 
   github_store:
     build: ./services/github_store
@@ -29,11 +35,17 @@ services:
       DB_TIMEZONE: ${DB_TIMEZONE}
       KAFKA_HOST: ${KAFKA_HOST}
       KAFKA_PORT: ${KAFKA_PORT}
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
     depends_on:
       github_database:
         condition: service_healthy
       broker:
         condition: service_healthy
+      loki:
+        condition: service_started
 
   github_load_events:
     build: ./services/github_load_events
@@ -42,9 +54,15 @@ services:
       INTERVAL: ${GITHUB_LOAD_EVENTS_INTERVAL}
       KAFKA_HOST: ${KAFKA_HOST}
       KAFKA_PORT: ${KAFKA_PORT}
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
     depends_on:
       broker:
         condition: service_healthy
+      loki:
+        condition: service_started
 
   github_load_organizations:
     build: ./services/github_load_organizations
@@ -52,9 +70,15 @@ services:
       GITHUB_TOKEN: ${GITHUB_TOKEN}
       KAFKA_HOST: ${KAFKA_HOST}
       KAFKA_PORT: ${KAFKA_PORT}
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
     depends_on:
       broker:
         condition: service_healthy
+      loki:
+        condition: service_started
 
   github_database:
     image: postgres
@@ -69,12 +93,19 @@ services:
       - ${DB_PORT}:${DB_PORT}
     volumes:
       - ${DB_DATA}:/var/lib/postgresql/data
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
       interval: 5s
       timeout: 5s
       retries: 5
-  
+    depends_on:
+      loki:
+        condition: service_started
+
   scheduler_load_organizations:
     build: ./services/scheduler
     environment:
@@ -82,15 +113,28 @@ services:
       KAFKA_PORT: ${KAFKA_PORT}
       NAME: load_organizations
       CRON: "*/1 * * * *"
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
     depends_on:
       broker:
         condition: service_healthy
+      loki:
+        condition: service_started
 
   adminer:
     image: adminer
     restart: always
     ports:
       - ${ADMINER_PORT}:8080
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    depends_on:
+      loki:
+        condition: service_started
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -98,6 +142,13 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    depends_on:
+      loki:
+        condition: service_started
 
   broker:
     image: confluentinc/cp-kafka:7.3.2
@@ -105,7 +156,10 @@ services:
     ports:
       - "${KAFKA_PORT_EXTERN}:${KAFKA_PORT_EXTERN}"
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_started
+      loki:
+        condition: service_started
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
@@ -114,9 +168,68 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
     healthcheck:
       test: nc -z localhost 9092 || exit -1
       start_period: 15s
       interval: 5s
       timeout: 10s
       retries: 10
+
+  grafana_database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${GF_DB_USER}
+      POSTGRES_DB: ${GF_DB_NAME}
+      POSTGRES_PASSWORD: ${GF_DB_PASSWORD}
+      PGPORT: ${GF_DB_PORT}
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - ${GF_DB_PORT}:${GF_DB_PORT}
+    volumes:
+      - ./data/grafana_database:/var/lib/postgresql/data
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U grafana -d grafana" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      loki:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana-oss
+    ports:
+      - 5004:3000
+    user: '104'
+    environment:
+      GF_DATABASE_TYPE: ${GF_DB_TYPE}
+      GF_DATABASE_HOST: ${GF_DB_HOST}:${GF_DB_PORT}
+      GF_DATABASE_NAME: ${GF_DB_NAME}
+      GF_DATABASE_USER: ${GF_DB_USER}
+      GF_DATABASE_PASSWORD: ${GF_DB_PASSWORD}
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://172.17.0.1:3100/loki/api/v1/push"
+    depends_on:
+      grafana_database:
+        condition: service_healthy
+      loki:
+        condition: service_started
+
+  loki:
+    image: grafana/loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./services/grafana/loki-config.yaml:/etc/loki/config.yaml
+    command: -config.file=/etc/loki/config.yaml

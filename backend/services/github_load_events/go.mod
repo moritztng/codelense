@@ -7,6 +7,7 @@ require (
 	github.com/google/go-github/v52 v52.0.0
 	github.com/joho/godotenv v1.5.1
 	github.com/moritztng/codelense/backend/model v0.0.0-20230604022552-b540984bc3c6
+	go.uber.org/zap v1.24.0
 	golang.org/x/oauth2 v0.7.0
 	gorm.io/datatypes v1.2.0
 )
@@ -19,6 +20,8 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect

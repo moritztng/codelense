@@ -12,6 +12,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/moritztng/codelense/backend/model"
+	"go.uber.org/zap"
 )
 
 type authedTransport struct {
@@ -25,6 +26,10 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func main() {
+	baseLogger, _ := zap.NewProduction()
+	logger := baseLogger.Sugar()
+	defer logger.Sync()
+	logger.Info("start")
 	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT"))})
 	graphqlClient := graphql.NewClient("https://api.github.com/graphql",
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
@@ -39,7 +44,6 @@ func main() {
 	for {
 		_, err := kafkaConsumer.ReadMessage(time.Second)
 		if err != nil {
-			fmt.Println(err)
 			continue
 		}
 		minCreated := "1970-01-01"
@@ -75,7 +79,7 @@ func main() {
 					keys[organization.DatabaseId] = struct{}{}
 					total += 1
 				}
-				fmt.Println(total)
+				logger.Infow("loaded organizations", "created_after", minCreated, "total", total)
 				hasNextPage = response.Search.PageInfo.HasNextPage
 				nextPageCursor = response.Search.PageInfo.EndCursor
 			}
@@ -83,6 +87,7 @@ func main() {
 		}
 		kafkaProducer.Flush(15 * 1000)
 	}
+	logger.Info("stop")
 	kafkaProducer.Close()
 }
 

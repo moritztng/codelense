@@ -12,11 +12,16 @@ import (
 	"github.com/google/go-github/v52/github"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/moritztng/codelense/backend/model"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 	"gorm.io/datatypes"
 )
 
 func main() {
+	baseLogger, _ := zap.NewProduction()
+	logger := baseLogger.Sugar()
+	defer logger.Sync()
+	logger.Info("start")
 	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT"))})
 	topic := "github_load_events"
 	ctx := context.Background()
@@ -33,15 +38,10 @@ func main() {
 	for {
 		select {
 		case <-ticker.C:
-			events, _, err := githubClient.Activity.ListEvents(context.Background(), githubOptions)
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
+			events, _, _ := githubClient.Activity.ListEvents(context.Background(), githubOptions)
 			nEvents := 0
 			for _, event := range events {
 				if event.GetID() == lastId {
-					fmt.Println("already loaded")
 					break
 				}
 				id, _ := strconv.Atoi(event.GetID())
@@ -52,13 +52,14 @@ func main() {
 				}, nil)
 				nEvents++
 			}
-			fmt.Println(nEvents)
+			logger.Infow("events loaded", "number", nEvents)
 			lastId = events[0].GetID()
 		case <-quit:
 			ticker.Stop()
 			return
 		}
 	}
+	logger.Info("stop")
 	kafkaProducer.Flush(15 * 1000)
 	kafkaProducer.Close()
 }
