@@ -40,7 +40,7 @@ func main() {
 	}
 	kafkaConsumer, _ := kafka.NewConsumer(&kafkaConfig)
 	defer kafkaConsumer.Close()
-	kafkaConsumer.SubscribeTopics([]string{"scheduler_load_organizations"}, nil)
+	kafkaConsumer.SubscribeTopics([]string{"schedule_load_organizations"}, nil)
 	for {
 		_, err := kafkaConsumer.ReadMessage(time.Second)
 		if err != nil {

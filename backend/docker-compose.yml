@@ -80,6 +80,27 @@ services:
       loki:
         condition: service_started
 
+  github_query:
+    build: ./services/github_query
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_TIMEZONE: ${DB_TIMEZONE}
+      KAFKA_HOST: ${KAFKA_HOST}
+      KAFKA_PORT: ${KAFKA_PORT}
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    depends_on:
+      broker:
+        condition: service_healthy
+      loki:
+        condition: service_started
+
   github_database:
     image: postgres
     restart: always
@@ -106,13 +127,49 @@ services:
       loki:
         condition: service_started
 
-  scheduler_load_organizations:
-    build: ./services/scheduler
+  schedule_load_organizations:
+    build: ./services/schedule
     environment:
       KAFKA_HOST: ${KAFKA_HOST}
       KAFKA_PORT: ${KAFKA_PORT}
       NAME: load_organizations
       CRON: "*/1 * * * *"
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    depends_on:
+      broker:
+        condition: service_healthy
+      loki:
+        condition: service_started
+
+  schedule_github_query_org_stars:
+    build: ./services/schedule
+    environment:
+      KAFKA_HOST: ${KAFKA_HOST}
+      KAFKA_PORT: ${KAFKA_PORT}
+      NAME: github_query
+      CRON: "*/1 * * * *"
+      MESSAGE: "{\"queryName\": \"german_orgs_star_events\", \"query\": \"SELECT events.github_created_at, events.org_id, german_orgs.organization_name FROM events INNER JOIN german_orgs ON events.org_id=german_orgs.organization_github_id WHERE events.type='WatchEvent'\"}"
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    depends_on:
+      broker:
+        condition: service_healthy
+      loki:
+        condition: service_started
+  
+  schedule_github_query_orgs:
+    build: ./services/schedule
+    environment:
+      KAFKA_HOST: ${KAFKA_HOST}
+      KAFKA_PORT: ${KAFKA_PORT}
+      NAME: github_query
+      CRON: "*/1 * * * *"
+      MESSAGE: "{\"queryName\": \"german_orgs\", \"query\": \"SELECT DISTINCT organization_github_id, organization_name FROM organization_events\"}"
     logging:
       driver: loki
       options:

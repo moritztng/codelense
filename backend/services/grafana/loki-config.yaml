@@ -22,6 +22,7 @@ query_range:
       embedded_cache:
         enabled: true
         max_size_mb: 100
+  parallelise_shardable_queries: false
 
 schema_config:
   configs:

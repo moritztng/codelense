@@ -3,8 +3,9 @@ go 1.19
 use (
 	./model
 	./services/api
+	./services/github_query
 	./services/github_load_events
 	./services/github_load_organizations
-	./services/scheduler
 	./services/github_store
+	./services/schedule
 )

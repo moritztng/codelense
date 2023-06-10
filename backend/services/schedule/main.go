@@ -21,9 +21,11 @@ func main() {
 	scheduler := gocron.NewScheduler(time.UTC)
 	scheduler.Cron(os.Getenv("CRON")).Do(func() {
 		logger.Infow("schedule", "name", os.Getenv("NAME"))
-		produceTopic := fmt.Sprintf("scheduler_%s", os.Getenv("NAME"))
+		produceTopic := fmt.Sprintf("schedule_%s", os.Getenv("NAME"))
+		fmt.Print(os.Getenv("MESSAGE"))
 		producer.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
+			Value:          []byte(os.Getenv("MESSAGE")),
 		}, nil)
 	})
 	scheduler.StartBlocking()
