@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -22,7 +23,8 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 	datetime, _ := time.Parse("2006-01-02", os.Getenv("START_DATE"))
-	for ; datetime.Before(time.Now()); datetime.Add(time.Hour) {
+	copyBufferLength, _ := strconv.Atoi(os.Getenv("COPY_BUFFER_LENGTH"))
+	for ; datetime.Before(time.Now()); datetime = datetime.Add(time.Hour) {
 		url := fmt.Sprintf("https://data.gharchive.org/%d-%02d-%02d-%d.json.gz", datetime.Year(), datetime.Month(), datetime.Day(), datetime.Hour())
 		log.Println(url)
 		response, err := http.Get(url)
@@ -36,7 +38,6 @@ func main() {
 		scanner := bufio.NewScanner(gzipReader)
 		scannerBuffer := make([]byte, 0, 64*1024)
 		scanner.Buffer(scannerBuffer, 1024*1024)
-		copyBufferLength := 10000
 		copyBuffer := make([][]any, copyBufferLength)
 	loop:
 		for {
