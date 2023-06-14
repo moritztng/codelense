@@ -10,3 +10,4 @@ services:
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
       START_DATE: ${START_DATE}
+      COPY_BUFFER_LENGTH: ${COPY_BUFFER_LENGTH}
