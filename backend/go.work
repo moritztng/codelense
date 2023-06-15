@@ -3,9 +3,10 @@ go 1.19
 use (
 	./model
 	./services/api
-	./services/github_query
+	./services/gharchive_to_events
 	./services/github_load_events
 	./services/github_load_organizations
+	./services/github_query
 	./services/github_store
 	./services/schedule
 )
