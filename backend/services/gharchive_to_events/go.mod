@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/jackc/pgx/v5 v5.4.0
 	github.com/joho/godotenv v1.5.1
-	github.com/moritztng/codelense/backend/model v0.0.0-20230614005650-5f7fb6d679c3
+	github.com/moritztng/codelense/backend/model v0.0.0-20230616000526-84b06d4a6943
 )
 
 require (
