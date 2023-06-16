@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  schedule:
+    build: .
+    environment:
+      KAFKA_HOST: ${KAFKA_HOST}
+      KAFKA_PORT: ${KAFKA_PORT}
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push

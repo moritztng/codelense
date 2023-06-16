@@ -1,0 +1,49 @@
+version: '3.1'
+
+services:
+  grafana_database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${GF_DB_USER}
+      POSTGRES_DB: ${GF_DB_NAME}
+      POSTGRES_PASSWORD: ${GF_DB_PASSWORD}
+      PGPORT: ${GF_DB_PORT}
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - ${GF_DB_PORT}:${GF_DB_PORT}
+    volumes:
+      - ../../data/grafana_database:/var/lib/postgresql/data
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U grafana -d grafana" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana-oss
+    ports:
+      - 5004:3000
+    user: '104'
+    environment:
+      GF_DATABASE_TYPE: ${GF_DB_TYPE}
+      GF_DATABASE_HOST: ${GF_DB_HOST}:${GF_DB_PORT}
+      GF_DATABASE_NAME: ${GF_DB_NAME}
+      GF_DATABASE_USER: ${GF_DB_USER}
+      GF_DATABASE_PASSWORD: ${GF_DB_PASSWORD}
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://172.17.0.1:3100/loki/api/v1/push"
+
+  loki:
+    image: grafana/loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./services/grafana/loki-config.yaml:/etc/loki/config.yaml
+    command: -config.file=/etc/loki/config.yaml

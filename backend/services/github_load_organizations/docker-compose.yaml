@@ -1,0 +1,18 @@
+version: '3.1'
+
+services:
+  github_load_organizations:
+    build: .
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      KAFKA_HOST: ${KAFKA_HOST}
+      KAFKA_PORT: ${KAFKA_PORT}
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    depends_on:
+      broker:
+        condition: service_healthy
+      loki:
+        condition: service_started

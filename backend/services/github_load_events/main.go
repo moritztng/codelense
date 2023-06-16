@@ -14,7 +14,6 @@ import (
 	"github.com/moritztng/codelense/backend/model"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
-	"gorm.io/datatypes"
 )
 
 func main() {
@@ -45,7 +44,7 @@ func main() {
 					break
 				}
 				id, _ := strconv.Atoi(event.GetID())
-				eventJson, _ := json.Marshal(model.Event{GithubID: uint(id), Type: event.GetType(), ActorID: uint(event.GetActor().GetID()), OrgID: uint(event.GetOrg().GetID()), RepositoryID: uint(event.GetRepo().GetID()), Payload: datatypes.JSON(event.GetRawPayload()), GithubCreatedAt: event.GetCreatedAt().Time})
+				eventJson, _ := json.Marshal(model.Event{GithubId: uint(id), Type: event.GetType(), ActorId: uint(event.GetActor().GetID()), ActorLogin: event.GetActor().GetLogin(), ActorUrl: event.GetActor().GetURL(), ActorAvatarUrl: event.GetActor().GetAvatarURL(), RepositoryId: uint(event.GetRepo().GetID()), RepositoryName: event.GetRepo().GetName(), RepositoryUrl: event.GetRepo().GetURL(), Payload: event.GetRawPayload(), Public: event.GetPublic(), GithubCreatedAt: event.GetCreatedAt().Time, OrgId: uint(event.GetOrg().GetID()), OrgLogin: event.GetOrg().GetLogin(), OrgUrl: event.GetOrg().GetURL(), OrgAvatarUrl: event.GetOrg().GetAvatarURL()})
 				kafkaProducer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 					Value:          eventJson,
