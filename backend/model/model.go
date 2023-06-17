@@ -24,7 +24,7 @@ type Organization struct {
 
 type OrganizationEvent struct {
 	gorm.Model
-	Organization Organization `gorm:"embedded;embeddedPrefix:organization_"`
+	Organization Organization `gorm:"embedded"`
 }
 
 type GharchiveEventJson struct {

@@ -2,13 +2,13 @@ version: '3.1'
 
 services:
 
-  api:
-    extends:
-      file: ./services/api/docker-compose.yaml
-      service: api
-    depends_on:
-      loki:
-        condition: service_started
+  # api:
+  #   extends:
+  #     file: ./services/api/docker-compose.yaml
+  #     service: api
+  #   depends_on:
+  #     loki:
+  #       condition: service_started
 
   github_store:
     extends:
@@ -20,15 +20,15 @@ services:
       loki:
         condition: service_started
 
-  github_load_events:
-    extends:
-      file: ./services/github_load_events/docker-compose.yaml
-      service: github_load_events
-    depends_on:
-      broker:
-        condition: service_healthy
-      loki:
-        condition: service_started
+  # github_load_events:
+  #   extends:
+  #     file: ./services/github_load_events/docker-compose.yaml
+  #     service: github_load_events
+  #   depends_on:
+  #     broker:
+  #       condition: service_healthy
+  #     loki:
+  #       condition: service_started
 
   github_load_organizations:
     extends:
@@ -56,35 +56,35 @@ services:
       service: schedule
     environment:
       NAME: load_organizations
-      CRON: "*/1 * * * *"
-    depends_on:
-      broker:
-        condition: service_healthy
-      loki:
-        condition: service_started
-
-  schedule_github_query_org_stars:
-    extends:
-      file: ./services/schedule/docker-compose.yaml
-      service: schedule
-    environment:
-      NAME: github_query
-      CRON: "*/1 * * * *"
-      MESSAGE: "{\"queryName\": \"german_orgs_star_events\", \"query\": \"SELECT events.github_created_at, events.org_id, german_orgs.organization_name FROM events INNER JOIN german_orgs ON events.org_id=german_orgs.organization_github_id WHERE events.type='WatchEvent'\"}"
+      CRON: "*/100 * * * *"
     depends_on:
       broker:
         condition: service_healthy
       loki:
         condition: service_started
   
-  schedule_github_query_orgs:
+  schedule_repositories_time_stars:
     extends:
       file: ./services/schedule/docker-compose.yaml
       service: schedule
     environment:
       NAME: github_query
-      CRON: "*/1 * * * *"
-      MESSAGE: "{\"queryName\": \"german_orgs\", \"query\": \"SELECT DISTINCT organization_github_id, organization_name FROM organization_events\"}"
+      CRON: "*/100 * * * *"
+      MESSAGE: "{\"queryName\": \"repositories_time_stars\", \"query\": \"SELECT to_timestamp(round(extract('epoch' from github_created_at) / 3600) * 3600) as time, repository_name, count(*) as star_count FROM (select * from events limit 3000000) as part WHERE type='WatchEvent' GROUP BY time, repository_name HAVING count(*)>=10 ORDER BY time\"}"
+    depends_on:
+      broker:
+        condition: service_healthy
+      loki:
+        condition: service_started
+
+  schedule_github_organizations_german:
+    extends:
+      file: ./services/schedule/docker-compose.yaml
+      service: schedule
+    environment:
+      NAME: github_query
+      CRON: "*/100 * * * *"
+      MESSAGE: "{\"queryName\": \"organizations_german\", \"query\": \"SELECT distinct on (github_id) * FROM organization_events\"}"
     depends_on:
       broker:
         condition: service_healthy

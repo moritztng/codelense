@@ -10,10 +10,10 @@ services:
       POSTGRES_PASSWORD: ${GF_DB_PASSWORD}
       PGPORT: ${GF_DB_PORT}
       PGDATA: /var/lib/postgresql/data
-    ports:
-      - ${GF_DB_PORT}:${GF_DB_PORT}
     volumes:
       - ../../data/grafana_database:/var/lib/postgresql/data
+    ports:
+      - ${GF_DB_PORT}:${GF_DB_PORT}
     logging:
       driver: loki
       options:
@@ -45,5 +45,5 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ./services/grafana/loki-config.yaml:/etc/loki/config.yaml
+      - ./loki-config.yaml:/etc/loki/config.yaml
     command: -config.file=/etc/loki/config.yaml
