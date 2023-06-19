@@ -1,5 +1,15 @@
 version: '3.1'
 
+x-schedule: &schedule
+  extends:
+    file: ./services/schedule/docker-compose.yaml
+    service: schedule
+  depends_on:
+    broker:
+      condition: service_healthy
+    loki:
+      condition: service_started
+
 services:
 
   # api:
@@ -20,15 +30,15 @@ services:
       loki:
         condition: service_started
 
-  # github_load_events:
-  #   extends:
-  #     file: ./services/github_load_events/docker-compose.yaml
-  #     service: github_load_events
-  #   depends_on:
-  #     broker:
-  #       condition: service_healthy
-  #     loki:
-  #       condition: service_started
+  github_load_events:
+    extends:
+      file: ./services/github_load_events/docker-compose.yaml
+      service: github_load_events
+    depends_on:
+      broker:
+        condition: service_healthy
+      loki:
+        condition: service_started
 
   github_load_organizations:
     extends:
@@ -51,45 +61,31 @@ services:
         condition: service_started
 
   schedule_load_organizations:
-    extends:
-      file: ./services/schedule/docker-compose.yaml
-      service: schedule
+    <<: *schedule
     environment:
       NAME: load_organizations
       CRON: "*/100 * * * *"
-    depends_on:
-      broker:
-        condition: service_healthy
-      loki:
-        condition: service_started
   
   schedule_repositories_time_stars:
-    extends:
-      file: ./services/schedule/docker-compose.yaml
-      service: schedule
+    <<: *schedule
     environment:
       NAME: github_query
       CRON: "*/100 * * * *"
       MESSAGE: "{\"queryName\": \"repositories_time_stars\", \"query\": \"SELECT to_timestamp(round(extract('epoch' from github_created_at) / 3600) * 3600) as time, repository_name, count(*) as star_count FROM (select * from events limit 3000000) as part WHERE type='WatchEvent' GROUP BY time, repository_name HAVING count(*)>=10 ORDER BY time\"}"
-    depends_on:
-      broker:
-        condition: service_healthy
-      loki:
-        condition: service_started
 
   schedule_github_organizations_german:
-    extends:
-      file: ./services/schedule/docker-compose.yaml
-      service: schedule
+    <<: *schedule
     environment:
       NAME: github_query
       CRON: "*/100 * * * *"
       MESSAGE: "{\"queryName\": \"organizations_german\", \"query\": \"SELECT distinct on (github_id) * FROM organization_events\"}"
-    depends_on:
-      broker:
-        condition: service_healthy
-      loki:
-        condition: service_started
+  
+  schedule_german_orgs_time_stars:
+    <<: *schedule
+    environment:
+      NAME: github_query
+      CRON: "*/100 * * * *"
+      MESSAGE: "{\"queryName\": \"german_orgs_time_stars\", \"query\": \"SELECT ORGS_STAR_COUNT.TIME, ORGANIZATIONS_GERMAN.LOGIN, ORGS_STAR_COUNT.STAR_COUNT FROM (SELECT TO_TIMESTAMP(ROUND(EXTRACT('epoch' FROM GITHUB_CREATED_AT) / 3600) * 3600) AS TIME, ORG_ID, COUNT(*) AS STAR_COUNT FROM EVENTS_GERMAN_ORGS WHERE TYPE = 'WatchEvent' GROUP BY TIME, ORG_ID ORDER BY TIME) AS ORGS_STAR_COUNT LEFT JOIN ORGANIZATIONS_GERMAN ON ORGS_STAR_COUNT.ORG_ID = ORGANIZATIONS_GERMAN.GITHUB_ID\"}"
 
   database:
     extends:
