@@ -4,42 +4,16 @@
 
 scalar Time
 
-type Organization {
-	GithubID:        ID!
-	Login:           String!
-	Name:            String!
-	Email:           String
-	Description:     String
-	TwitterUsername: String
-	WebsiteUrl:      String
-	Url:             String
-	AvatarUrl:       String
-	GithubCreatedAt: Time!
-	GithubUpdatedAt: Time
+type TimePoint {
+	Time: Time!
+	Values: [Value]
 }
 
-type OrganizationEvent {
-  id: ID!
-  createdAt: Time!
-  updatedAt: Time
-  organization: Organization
-}
-
-type Event {
-  id: ID!
-  createdAt: Time!
-  updatedAt: Time
-  GithubID:        ID!
-	Type:            String!
-	ActorId:         ID
-	OrgId:           ID
-	RepositoryId:    ID
-	Payload:         String!
-	Public:          Boolean
-	GithubCreatedAt: Time!
+type Value {
+	Name: String!
+	Value: Int!
 }
 
 type Query {
-  organizationEvents(first: Int!): [OrganizationEvent]!
-  events(first: Int!): [Event]!
+  timePoints(from: Int, to: Int): [TimePoint]!
 }
