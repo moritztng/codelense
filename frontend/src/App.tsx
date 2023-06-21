@@ -1,13 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import Button from 'react-bootstrap/Button';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from 'recharts'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { useQuery, gql } from '@apollo/client'
 import './App.css'
 
+const GET_TIME_POINTS = gql`
+  query timePoints {
+    timePoints {
+      Time
+        Values {
+          Name
+          Value
+    }
+  }}`;
+
 function App() {
-  const [count, setCount] = useState(0)
-  const data = [
+  const { loading, error, data } = useQuery(GET_TIME_POINTS)
+  if (loading) return <p>Loading...</p>
+  if (error) return <p>Error : {error.message}</p>
+  const data2 = [
     {
       name: 'Page A',
       uv: 4000,
@@ -50,52 +70,39 @@ function App() {
       pv: 4300,
       amt: 2100,
     },
-  ];
+  ]
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <Button>
-        hallo
-      </Button>
-        <LineChart
-          width={500}
-          height={300}
-          data={data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-        </LineChart>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>{data.timePoints[0].Time}</h1>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker />
+        <DatePicker />
+      </LocalizationProvider>
+      <LineChart
+        width={500}
+        height={300}
+        data={data2}
+        margin={{
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Line
+          type="monotone"
+          dataKey="pv"
+          stroke="#8884d8"
+          activeDot={{ r: 8 }}
+        />
+        <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+      </LineChart>
     </>
   )
 }
