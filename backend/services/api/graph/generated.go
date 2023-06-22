@@ -46,7 +46,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Query struct {
-		TimePoints func(childComplexity int, from *int, to *int) int
+		TimePoints func(childComplexity int, fromDate int, toDate int) int
 	}
 
 	TimePoint struct {
@@ -61,7 +61,7 @@ type ComplexityRoot struct {
 }
 
 type QueryResolver interface {
-	TimePoints(ctx context.Context, from *int, to *int) ([]*model.TimePoint, error)
+	TimePoints(ctx context.Context, fromDate int, toDate int) ([]*model.TimePoint, error)
 }
 
 type executableSchema struct {
@@ -89,7 +89,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.TimePoints(childComplexity, args["from"].(*int), args["to"].(*int)), true
+		return e.complexity.Query.TimePoints(childComplexity, args["fromDate"].(int), args["toDate"].(int)), true
 
 	case "TimePoint.Time":
 		if e.complexity.TimePoint.Time == nil {
@@ -208,24 +208,24 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_timePoints_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["from"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("from"))
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	var arg0 int
+	if tmp, ok := rawArgs["fromDate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fromDate"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["from"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["to"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("to"))
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	args["fromDate"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["toDate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toDate"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["to"] = arg1
+	args["toDate"] = arg1
 	return args, nil
 }
 
@@ -281,7 +281,7 @@ func (ec *executionContext) _Query_timePoints(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().TimePoints(rctx, fc.Args["from"].(*int), fc.Args["to"].(*int))
+		return ec.resolvers.Query().TimePoints(rctx, fc.Args["fromDate"].(int), fc.Args["toDate"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3241,22 +3241,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	res := graphql.MarshalBoolean(*v)
-	return res
-}
-
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalInt(*v)
 	return res
 }
 

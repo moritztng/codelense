@@ -6,16 +6,21 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/moritztng/codelense/backend/services/api/graph/model"
 )
 
 // TimePoints is the resolver for the timePoints field.
-func (r *queryResolver) TimePoints(ctx context.Context, from *int, to *int) ([]*model.TimePoint, error) {
+func (r *queryResolver) TimePoints(ctx context.Context, fromDate int, toDate int) ([]*model.TimePoint, error) {
+	fromDateTime := time.Unix(int64(fromDate), 0)
 	timePoints := []*model.TimePoint{}
-	for i := 0; i < 10; i++ {
-		timePoints = append(timePoints, &model.TimePoint{Time: time.Now(), Values: []*model.Value{{Name: "Prism", Value: i}}})
+	currentTime := fromDateTime
+	for i := 0; i < 7; i++ {
+		currentTime = currentTime.Add(24 * time.Hour)
+		fmt.Println(fromDateTime)
+		timePoints = append(timePoints, &model.TimePoint{Time: currentTime, Values: []*model.Value{{Name: "Prism", Value: i}}})
 	}
 	return timePoints, nil
 }
