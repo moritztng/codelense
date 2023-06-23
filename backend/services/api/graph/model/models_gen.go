@@ -2,13 +2,9 @@
 
 package model
 
-import (
-	"time"
-)
-
 type TimePoint struct {
-	Time   time.Time `json:"Time"`
-	Values []*Value  `json:"Values,omitempty"`
+	Time   int      `json:"Time"`
+	Values []*Value `json:"Values"`
 }
 
 type Value struct {

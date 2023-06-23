@@ -9,7 +9,8 @@ import (
 )
 
 type Organization struct {
-	GithubID        uint
+	gorm.Model
+	GithubID        uint `gorm:"unique"`
 	Login           string
 	Name            string
 	Email           string
@@ -20,11 +21,6 @@ type Organization struct {
 	AvatarUrl       string
 	GithubCreatedAt time.Time
 	GithubUpdatedAt time.Time
-}
-
-type OrganizationEvent struct {
-	gorm.Model
-	Organization Organization `gorm:"embedded"`
 }
 
 type GharchiveEventJson struct {
@@ -76,4 +72,8 @@ type Event struct {
 	OrgLogin        string          `json:"org_login"`
 	OrgUrl          string          `json:"org_url"`
 	OrgAvatarUrl    string          `json:"org_avatar_url"`
+}
+
+type OrganizationEvent struct {
+	Login string `json:"login"`
 }

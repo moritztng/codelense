@@ -5,8 +5,8 @@
 scalar Time
 
 type TimePoint {
-	Time: Time!
-	Values: [Value]
+	Time: Int!
+	Values: [Value]!
 }
 
 type Value {

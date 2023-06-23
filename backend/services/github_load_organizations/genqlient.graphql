@@ -15,15 +15,7 @@ query getOrganizations(
         ... on Organization {
           databaseId
           login
-          email
-          name
           createdAt
-          avatarUrl
-          description
-          twitterUsername
-          updatedAt
-          websiteUrl
-          url
         }
       }
     }

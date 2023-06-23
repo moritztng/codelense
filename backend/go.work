@@ -5,6 +5,7 @@ use (
 	./services/api
 	./services/gharchive_to_events
 	./services/github_load_events
+	./services/github_load_organization
 	./services/github_load_organizations
 	./services/github_query
 	./services/github_store

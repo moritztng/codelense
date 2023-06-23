@@ -1,0 +1,15 @@
+query getOrganization($login: String!) {
+  organization(login: $login) {
+    databaseId
+    login
+    email
+    name
+    createdAt
+    avatarUrl
+    description
+    twitterUsername
+    updatedAt
+    websiteUrl
+    url
+  }
+}

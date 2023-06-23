@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -483,9 +482,9 @@ func (ec *executionContext) _TimePoint_Time(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(time.Time)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TimePoint_Time(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -495,7 +494,7 @@ func (ec *executionContext) fieldContext_TimePoint_Time(ctx context.Context, fie
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -522,11 +521,14 @@ func (ec *executionContext) _TimePoint_Values(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.Value)
 	fc.Result = res
-	return ec.marshalOValue2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx, field.Selections, res)
+	return ec.marshalNValue2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TimePoint_Values(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2503,6 +2505,9 @@ func (ec *executionContext) _TimePoint(ctx context.Context, sel ast.SelectionSet
 
 			out.Values[i] = ec._TimePoint_Values(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2912,21 +2917,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
-	res, err := graphql.UnmarshalTime(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	res := graphql.MarshalTime(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) marshalNTimePoint2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePoint(ctx context.Context, sel ast.SelectionSet, v []*model.TimePoint) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -2952,6 +2942,44 @@ func (ec *executionContext) marshalNTimePoint2ᚕᚖgithubᚗcomᚋmoritztngᚋc
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalOTimePoint2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePoint(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalNValue2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx context.Context, sel ast.SelectionSet, v []*model.Value) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOValue2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3265,47 +3293,6 @@ func (ec *executionContext) marshalOTimePoint2ᚖgithubᚗcomᚋmoritztngᚋcode
 		return graphql.Null
 	}
 	return ec._TimePoint(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOValue2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx context.Context, sel ast.SelectionSet, v []*model.Value) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOValue2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
 }
 
 func (ec *executionContext) marshalOValue2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx context.Context, sel ast.SelectionSet, v *model.Value) graphql.Marshaler {

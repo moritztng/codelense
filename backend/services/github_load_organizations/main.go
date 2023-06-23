@@ -65,8 +65,8 @@ func main() {
 					if exists {
 						continue
 					}
-					organizationEventJson, _ := json.Marshal(model.OrganizationEvent{Organization: model.Organization{GithubID: uint(organization.DatabaseId), Login: organization.Login, Name: organization.Name, GithubCreatedAt: organization.CreatedAt, Email: organization.Email, AvatarUrl: organization.AvatarUrl, Description: organization.Description, TwitterUsername: organization.TwitterUsername, GithubUpdatedAt: organization.UpdatedAt, WebsiteUrl: organization.WebsiteUrl, Url: organization.Url}})
-					topic := "github_load_organizations"
+					organizationEventJson, _ := json.Marshal(model.OrganizationEvent{Login: organization.Login})
+					topic := "github_organization_events"
 					kafkaProducer.Produce(&kafka.Message{
 						TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 						Value:          organizationEventJson,

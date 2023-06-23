@@ -22,7 +22,8 @@ func main() {
 	defer logger.Sync()
 	logger.Info("start")
 	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT"))})
-	topic := "github_load_events"
+	events_topic := "github_load_events"
+	organization_events_topic := "github_organization_events"
 	ctx := context.Background()
 	token := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
@@ -46,9 +47,16 @@ func main() {
 				id, _ := strconv.Atoi(event.GetID())
 				eventJson, _ := json.Marshal(model.Event{GithubId: uint(id), Type: event.GetType(), ActorId: uint(event.GetActor().GetID()), ActorLogin: event.GetActor().GetLogin(), ActorUrl: event.GetActor().GetURL(), ActorAvatarUrl: event.GetActor().GetAvatarURL(), RepositoryId: uint(event.GetRepo().GetID()), RepositoryName: event.GetRepo().GetName(), RepositoryUrl: event.GetRepo().GetURL(), Payload: event.GetRawPayload(), Public: event.GetPublic(), GithubCreatedAt: event.GetCreatedAt().Time, OrgId: uint(event.GetOrg().GetID()), OrgLogin: event.GetOrg().GetLogin(), OrgUrl: event.GetOrg().GetURL(), OrgAvatarUrl: event.GetOrg().GetAvatarURL()})
 				kafkaProducer.Produce(&kafka.Message{
-					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+					TopicPartition: kafka.TopicPartition{Topic: &events_topic, Partition: kafka.PartitionAny},
 					Value:          eventJson,
 				}, nil)
+				if event.GetOrg().GetID() != 0 {
+					organizationEventJson, _ := json.Marshal(model.OrganizationEvent{Login: event.GetOrg().GetLogin()})
+					kafkaProducer.Produce(&kafka.Message{
+						TopicPartition: kafka.TopicPartition{Topic: &organization_events_topic, Partition: kafka.PartitionAny},
+						Value:          organizationEventJson,
+					}, nil)
+				}
 				nEvents++
 			}
 			logger.Infow("events loaded", "number", nEvents)

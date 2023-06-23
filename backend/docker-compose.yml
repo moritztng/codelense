@@ -40,6 +40,16 @@ services:
       loki:
         condition: service_started
 
+  github_load_organization:
+    extends:
+      file: ./services/github_load_organization/docker-compose.yaml
+      service: github_load_organization
+    depends_on:
+      broker:
+        condition: service_healthy
+      loki:
+        condition: service_started
+
   github_load_organizations:
     extends:
       file: ./services/github_load_organizations/docker-compose.yaml

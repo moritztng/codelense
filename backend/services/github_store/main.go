@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 	logger.Info("start")
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s", os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE"))
 	database, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	database.AutoMigrate(&model.OrganizationEvent{})
+	database.AutoMigrate(&model.Organization{})
 	kafkaConfig := kafka.ConfigMap{
 		"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT")),
 		"group.id":          "github_store",
@@ -29,15 +30,18 @@ func main() {
 	}
 	kafkaConsumer, _ := kafka.NewConsumer(&kafkaConfig)
 	defer kafkaConsumer.Close()
-	kafkaConsumer.SubscribeTopics([]string{"github_load_organizations", "github_load_events"}, nil)
+	kafkaConsumer.SubscribeTopics([]string{"github_load_organization", "github_load_events"}, nil)
 	for {
 		message, err := kafkaConsumer.ReadMessage(time.Second)
 		if err == nil {
 			switch *message.TopicPartition.Topic {
-			case "github_load_organizations":
-				var organizationEvent model.OrganizationEvent
-				json.Unmarshal(message.Value, &organizationEvent)
-				database.Create(&organizationEvent)
+			case "github_load_organization":
+				var organization model.Organization
+				json.Unmarshal(message.Value, &organization)
+				database.Clauses(clause.OnConflict{
+					Columns:   []clause.Column{{Name: "github_id"}},
+					DoUpdates: clause.AssignmentColumns([]string{"updated_at", "login", "name", "email", "description", "twitter_username", "website_url", "url", "avatar_url", "github_created_at", "github_updated_at"}),
+				}).Create(&organization)
 			case "github_load_events":
 				var event model.Event
 				json.Unmarshal(message.Value, &event)
