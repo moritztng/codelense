@@ -6,20 +6,39 @@ package graph
 
 import (
 	"context"
+	"log"
+	"os"
+	"strconv"
 
+	pgx "github.com/jackc/pgx/v5"
 	"github.com/moritztng/codelense/backend/services/api/graph/model"
 )
 
 // TimePoints is the resolver for the timePoints field.
 func (r *queryResolver) TimePoints(ctx context.Context, fromDate int, toDate int) ([]*model.TimePoint, error) {
-	rows, _ := r.Database.Query(context.Background(), "SELECT ORGS_STAR_COUNT.TIME, ORGANIZATIONS_GERMAN.LOGIN, ORGS_STAR_COUNT.STAR_COUNT FROM (SELECT TO_TIMESTAMP(ROUND(EXTRACT('epoch' FROM GITHUB_CREATED_AT) / 3600) * 3600) AS TIME, ORG_ID, COUNT(*) AS STAR_COUNT FROM EVENTS_GERMAN_ORGS WHERE TYPE = 'WatchEvent' GROUP BY TIME, ORG_ID ORDER BY TIME) AS ORGS_STAR_COUNT LEFT JOIN ORGANIZATIONS_GERMAN ON ORGS_STAR_COUNT.ORG_ID = ORGANIZATIONS_GERMAN.GITHUB_ID\"	", 5)
-	// fromDateTime := time.Unix(int64(fromDate), 0)
-	// timePoints := []*model.TimePoint{}
-	// currentTime := fromDateTime
-	// for i := 0; i < 7; i++ {
-	// currentTime = currentTime.Add(24 * time.Hour)
-	// timePoints = append(timePoints, &model.TimePoint{Time: int(currentTime.Unix()), Values: []*model.Value{{Name: "Prism", Value: i}}})
-	// }
+	query, _ := os.ReadFile("query.sql")
+	rows, err := r.Database.Query(context.Background(), string(query), fromDate, toDate)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var time int
+	var org_id int
+	var stars_sum int
+	timePoints := []*model.TimePoint{}
+	timePoint := &model.TimePoint{}
+	_, err = pgx.ForEachRow(rows, []any{&time, &org_id, &stars_sum}, func() error {
+		if timePoint.Time != time {
+			if timePoint.Time != 0 {
+				timePoints = append(timePoints, timePoint)
+			}
+			timePoint = &model.TimePoint{Time: time}
+		}
+		timePoint.Values = append(timePoint.Values, &model.Value{Name: strconv.Itoa(org_id), Value: stars_sum})
+		return nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 	return timePoints, nil
 }
 
