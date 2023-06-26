@@ -40,7 +40,7 @@ func main() {
 				json.Unmarshal(message.Value, &organization)
 				database.Clauses(clause.OnConflict{
 					Columns:   []clause.Column{{Name: "github_id"}},
-					DoUpdates: clause.AssignmentColumns([]string{"updated_at", "login", "name", "email", "description", "twitter_username", "website_url", "url", "avatar_url", "github_created_at", "github_updated_at"}),
+					DoUpdates: clause.AssignmentColumns([]string{"updated_at", "login", "name", "email", "description", "location", "twitter_username", "website_url", "url", "avatar_url", "github_created_at", "github_updated_at"}),
 				}).Create(&organization)
 			case "github_load_events":
 				var event model.Event

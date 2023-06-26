@@ -15,6 +15,7 @@ type Organization struct {
 	Name            string
 	Email           string
 	Description     string
+	Location        string
 	TwitterUsername string
 	WebsiteUrl      string
 	Url             string

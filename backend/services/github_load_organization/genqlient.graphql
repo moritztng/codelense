@@ -4,6 +4,7 @@ query getOrganization($login: String!) {
     login
     email
     name
+    location
     createdAt
     avatarUrl
     description

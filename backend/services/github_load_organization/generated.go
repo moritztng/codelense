@@ -30,6 +30,8 @@ type getOrganizationOrganization struct {
 	Email string `json:"email"`
 	// The organization's public profile name.
 	Name string `json:"name"`
+	// The organization's public profile location.
+	Location string `json:"location"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// A URL pointing to the organization's public avatar.
@@ -57,6 +59,9 @@ func (v *getOrganizationOrganization) GetEmail() string { return v.Email }
 
 // GetName returns getOrganizationOrganization.Name, and is useful for accessing the field via an interface.
 func (v *getOrganizationOrganization) GetName() string { return v.Name }
+
+// GetLocation returns getOrganizationOrganization.Location, and is useful for accessing the field via an interface.
+func (v *getOrganizationOrganization) GetLocation() string { return v.Location }
 
 // GetCreatedAt returns getOrganizationOrganization.CreatedAt, and is useful for accessing the field via an interface.
 func (v *getOrganizationOrganization) GetCreatedAt() time.Time { return v.CreatedAt }
@@ -98,6 +103,7 @@ query getOrganization ($login: String!) {
 		login
 		email
 		name
+		location
 		createdAt
 		avatarUrl
 		description

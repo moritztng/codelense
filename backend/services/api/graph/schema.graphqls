@@ -15,5 +15,5 @@ type Value {
 }
 
 type Query {
-  timePoints(fromDate: Int!, toDate: Int!): [TimePoint]!
+  timePoints(fromDate: Int!, toDate: Int!): [TimePoint!]!
 }

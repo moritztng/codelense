@@ -50,7 +50,7 @@ func main() {
 		json.Unmarshal(message.Value, &organizationEvent)
 		response, _ := getOrganization(context.Background(), graphqlClient, organizationEvent.Login)
 		organization := response.GetOrganization()
-		organizationJson, _ := json.Marshal(model.Organization{GithubID: uint(organization.DatabaseId), Login: organization.Login, Name: organization.Name, GithubCreatedAt: organization.CreatedAt, Email: organization.Email, AvatarUrl: organization.AvatarUrl, Description: organization.Description, TwitterUsername: organization.TwitterUsername, GithubUpdatedAt: organization.UpdatedAt, WebsiteUrl: organization.WebsiteUrl, Url: organization.Url})
+		organizationJson, _ := json.Marshal(model.Organization{GithubID: uint(organization.DatabaseId), Login: organization.Login, Name: organization.Name, Location: organization.GetLocation(), GithubCreatedAt: organization.CreatedAt, Email: organization.Email, AvatarUrl: organization.AvatarUrl, Description: organization.Description, TwitterUsername: organization.TwitterUsername, GithubUpdatedAt: organization.UpdatedAt, WebsiteUrl: organization.WebsiteUrl, Url: organization.Url})
 		topic := "github_load_organization"
 		kafkaProducer.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
