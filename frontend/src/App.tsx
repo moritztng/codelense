@@ -13,6 +13,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { useQuery, gql } from '@apollo/client'
 import { useState } from 'react'
 import Button from 'react-bootstrap/Button'
+import ListGroup from 'react-bootstrap/ListGroup'
 
 import './App.css'
 import * as dayjs from 'dayjs'
@@ -25,6 +26,15 @@ const GET_TIME_POINTS = gql`
         Name
         Value
       }
+    }
+  }
+`
+
+const GET_ORGANIZATION = gql`
+  query organization($githubId: Int!) {
+    organization(githubId: $githubId) {
+      Login
+      AvatarUrl
     }
   }
 `
@@ -72,6 +82,17 @@ function Filter({
   )
 }
 
+function Organization({ githubId }: { githubId: any }) {
+  const { loading, error, data } = useQuery(GET_ORGANIZATION, {
+    variables: { githubId: githubId },
+  })
+  return (
+    <>
+      <ListGroup.Item>{data.organization.Login}</ListGroup.Item>
+    </>
+  )
+}
+
 function Chart({ fromDate, toDate }: ChartProps) {
   const { loading, error, data } = useQuery(GET_TIME_POINTS, {
     variables: { fromDate: fromDate.unix(), toDate: toDate.unix() },
@@ -86,15 +107,33 @@ function Chart({ fromDate, toDate }: ChartProps) {
       ...element.Values.map((value: any) => ({ [value.Name]: value.Value }))
     )
   )
-  const lastTimePoint = chartData.reduce((lastTimePoint: any, timePoint: any) => ({...lastTimePoint, ...timePoint}), {})
-  const firstTimePoint = {...lastTimePoint}
-  Object.keys(firstTimePoint).forEach(key => {
+  const lastTimePoint = chartData.reduce(
+    (lastTimePoint: any, timePoint: any) => ({
+      ...lastTimePoint,
+      ...timePoint,
+    }),
+    {}
+  )
+  const firstTimePoint = { ...lastTimePoint }
+  Object.keys(firstTimePoint).forEach((key) => {
     firstTimePoint[key] = 0
-  });
-  firstTimePoint["time"] = fromDate.unix()
+  })
+  firstTimePoint['time'] = fromDate.unix()
   chartData.unshift(firstTimePoint)
   chartData.push(lastTimePoint)
-  const colors = ["red", "darkblue", "blue", "green", "purple", "brown", "orange", "pink", "black", "gray"]
+  const organizations = Object.keys(firstTimePoint).filter(key => key != "time")
+  const colors = [
+    'red',
+    'darkblue',
+    'blue',
+    'green',
+    'purple',
+    'brown',
+    'orange',
+    'pink',
+    'black',
+    'gray',
+  ]
   return (
     <>
       <LineChart
@@ -109,13 +148,22 @@ function Chart({ fromDate, toDate }: ChartProps) {
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={unixTime => dayjs.unix(unixTime).format('DD/MM/YY')}/>
+        <XAxis
+          dataKey="time"
+          type="number"
+          domain={['dataMin', 'dataMax']}
+          tickFormatter={(unixTime) => dayjs.unix(unixTime).format('DD/MM/YY')}
+        />
         <YAxis />
-        <Legend />
-        {Object.keys(firstTimePoint).filter(key => key != "time").map((key: any, index: any) => {
+        {organizations.map((key: any, index: any) => {
           return <Line type="basis" dataKey={key} stroke={colors[index]} connectNulls />
         })}
       </LineChart>
+      <ListGroup>
+        {organizations.map((key: any, index: any) => {
+            return <Organization key={key} githubId={parseInt(key)} />
+          })}
+      </ListGroup>
     </>
   )
 }
