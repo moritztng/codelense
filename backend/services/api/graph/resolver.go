@@ -1,7 +1,7 @@
 package graph
 
 import (
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 //go:generate go run github.com/99designs/gqlgen generate
@@ -11,5 +11,5 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Database *pgx.Conn
+	Database *pgxpool.Pool
 }
