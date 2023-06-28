@@ -13,7 +13,7 @@ import (
 func main() {
 	producer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT"))})
 	defer producer.Close()
-	produceTopic := "github_organization_events"
+	produceTopic := "schedule_load_organizations"
 	value, _ := json.Marshal(model.OrganizationEvent{Login: "NVIDIA"})
 	producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &produceTopic, Partition: kafka.PartitionAny},
