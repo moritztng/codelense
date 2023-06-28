@@ -1,12 +1,4 @@
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -14,9 +6,10 @@ import { useQuery, gql } from '@apollo/client'
 import { useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import ListGroup from 'react-bootstrap/ListGroup'
+import Image from 'react-bootstrap/Image'
+import * as dayjs from 'dayjs'
 
 import './App.css'
-import * as dayjs from 'dayjs'
 
 const GET_TIME_POINTS = gql`
   query timePoints($fromDate: Int!, $toDate: Int!) {
@@ -39,25 +32,7 @@ const GET_ORGANIZATION = gql`
   }
 `
 
-interface FilterProps {
-  defaultFromDate: dayjs.Dayjs
-  defaultToDate: dayjs.Dayjs
-  onFilterChange: (filter: {
-    fromDate: dayjs.Dayjs
-    toDate: dayjs.Dayjs
-  }) => void
-}
-
-interface ChartProps {
-  fromDate: dayjs.Dayjs
-  toDate: dayjs.Dayjs
-}
-
-function Filter({
-  defaultFromDate,
-  defaultToDate,
-  onFilterChange,
-}: FilterProps) {
+function Filter({ defaultFromDate, defaultToDate, onFilterChange }: any) {
   const [fromDate, setFromDate] = useState(defaultFromDate)
   const [toDate, setToDate] = useState(defaultToDate)
   return (
@@ -82,18 +57,25 @@ function Filter({
   )
 }
 
-function Organization({ githubId }: { githubId: any }) {
+function Organization({ githubId }: any) {
   const { loading, error, data } = useQuery(GET_ORGANIZATION, {
     variables: { githubId: githubId },
   })
   return (
     <>
-      <ListGroup.Item>{data.organization.Login}</ListGroup.Item>
+      <ListGroup.Item>
+        {loading || (
+          <>
+            <Image src={data.organization.AvatarUrl} rounded width="50px" />
+            <p>{data.organization.Login}</p>
+          </>
+        )}
+      </ListGroup.Item>
     </>
   )
 }
 
-function Chart({ fromDate, toDate }: ChartProps) {
+function Chart({ fromDate, toDate }: any) {
   const { loading, error, data } = useQuery(GET_TIME_POINTS, {
     variables: { fromDate: fromDate.unix(), toDate: toDate.unix() },
   })
@@ -121,7 +103,9 @@ function Chart({ fromDate, toDate }: ChartProps) {
   firstTimePoint['time'] = fromDate.unix()
   chartData.unshift(firstTimePoint)
   chartData.push(lastTimePoint)
-  const organizations = Object.keys(firstTimePoint).filter(key => key != "time")
+  const organizations = Object.keys(firstTimePoint).filter(
+    (key) => key != 'time'
+  )
   const colors = [
     'red',
     'darkblue',
@@ -156,13 +140,20 @@ function Chart({ fromDate, toDate }: ChartProps) {
         />
         <YAxis />
         {organizations.map((key: any, index: any) => {
-          return <Line type="basis" dataKey={key} stroke={colors[index]} connectNulls />
+          return (
+            <Line
+              type="basis"
+              dataKey={key}
+              stroke={colors[index]}
+              connectNulls
+            />
+          )
         })}
       </LineChart>
       <ListGroup>
         {organizations.map((key: any, index: any) => {
-            return <Organization key={key} githubId={parseInt(key)} />
-          })}
+          return <Organization key={key} githubId={parseInt(key)} />
+        })}
       </ListGroup>
     </>
   )
