@@ -2,6 +2,11 @@
 
 package model
 
+type Organization struct {
+	Login     string `json:"Login"`
+	AvatarURL string `json:"AvatarUrl"`
+}
+
 type TimePoint struct {
 	Time   int      `json:"Time"`
 	Values []*Value `json:"Values"`

@@ -42,6 +42,17 @@ func (r *queryResolver) TimePoints(ctx context.Context, fromDate int, toDate int
 	return timePoints, nil
 }
 
+// Organization is the resolver for the organization field.
+func (r *queryResolver) Organization(ctx context.Context, githubID int) (*model.Organization, error) {
+	var login string
+	var avatar_url string
+	err := r.Database.QueryRow(context.Background(), "select login, avatar_url from organizations where github_id=$1", githubID).Scan(&login, &avatar_url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &model.Organization{Login: login, AvatarURL: avatar_url}, nil
+}
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 

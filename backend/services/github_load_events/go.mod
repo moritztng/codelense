@@ -6,7 +6,7 @@ require (
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/google/go-github/v52 v52.0.0
 	github.com/joho/godotenv v1.5.1
-	github.com/moritztng/codelense/backend/model v0.0.0-20230617024313-8225bd982aa1
+	github.com/moritztng/codelense/backend/model v0.0.0-20230626004521-cc1d0adaf753
 	go.uber.org/zap v1.24.0
 	golang.org/x/oauth2 v0.7.0
 )

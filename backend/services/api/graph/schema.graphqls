@@ -14,6 +14,12 @@ type Value {
 	Value: Int!
 }
 
+type Organization {
+	Login: String!
+	AvatarUrl: String!
+}
+
 type Query {
   timePoints(fromDate: Int!, toDate: Int!): [TimePoint!]!
+  organization(githubId: Int!): Organization!
 }

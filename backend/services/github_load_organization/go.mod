@@ -6,7 +6,7 @@ require (
 	github.com/Khan/genqlient v0.6.0
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/joho/godotenv v1.5.1
-	github.com/moritztng/codelense/backend/model v0.0.0-20230623120722-4d7857fbe6a7
+	github.com/moritztng/codelense/backend/model v0.0.0-20230626004521-cc1d0adaf753
 	go.uber.org/zap v1.24.0
 )
 
