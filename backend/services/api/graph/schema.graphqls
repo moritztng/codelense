@@ -20,6 +20,6 @@ type Organization {
 }
 
 type Query {
-  timePoints(fromDate: Int!, toDate: Int!): [TimePoint!]!
+  timePoints(fromDate: Int!, toDate: Int!, location: String!): [TimePoint!]!
   organization(githubId: Int!): Organization!
 }

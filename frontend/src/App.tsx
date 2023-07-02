@@ -7,13 +7,14 @@ import { useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import ListGroup from 'react-bootstrap/ListGroup'
 import Image from 'react-bootstrap/Image'
+import Form from 'react-bootstrap/Form';
 import * as dayjs from 'dayjs'
 
 import './App.css'
 
 const GET_TIME_POINTS = gql`
-  query timePoints($fromDate: Int!, $toDate: Int!) {
-    timePoints(fromDate: $fromDate, toDate: $toDate) {
+  query timePoints($fromDate: Int!, $toDate: Int!, $location: String!) {
+    timePoints(fromDate: $fromDate, toDate: $toDate, location: $location) {
       Time
       Values {
         Name
@@ -32,11 +33,13 @@ const GET_ORGANIZATION = gql`
   }
 `
 
-function Filter({ defaultFromDate, defaultToDate, onFilterChange }: any) {
+function Filter({ defaultFromDate, defaultToDate, defaultLocation, onFilterChange }: any) {
   const [fromDate, setFromDate] = useState(defaultFromDate)
   const [toDate, setToDate] = useState(defaultToDate)
+  const [location, setLocation] = useState(defaultLocation)
   return (
     <>
+      <Form.Control value={location} onChange={setLocation}/>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker
           value={fromDate}
@@ -49,7 +52,7 @@ function Filter({ defaultFromDate, defaultToDate, onFilterChange }: any) {
       </LocalizationProvider>
       <Button
         variant="primary"
-        onClick={() => onFilterChange({ fromDate: fromDate, toDate: toDate })}
+        onClick={() => onFilterChange({ fromDate: fromDate, toDate: toDate, location: location })}
       >
         Start
       </Button>
@@ -75,9 +78,9 @@ function Organization({ githubId }: any) {
   )
 }
 
-function Chart({ fromDate, toDate }: any) {
+function Chart({ fromDate, toDate, location }: any) {
   const { loading, error, data } = useQuery(GET_TIME_POINTS, {
-    variables: { fromDate: fromDate.unix(), toDate: toDate.unix() },
+    variables: { fromDate: fromDate.unix(), toDate: toDate.unix(), location: location },
   })
   if (loading) return <p>Loading...</p>
   if (error) return <p>Error : {error.message}</p>
@@ -163,15 +166,17 @@ function App() {
   const [filter, setFilter] = useState({
     fromDate: dayjs().subtract(7, 'day'),
     toDate: dayjs(),
+    location: "",
   })
   return (
     <>
       <Filter
         defaultFromDate={filter.fromDate}
         defaultToDate={filter.toDate}
+        defaultLocation={filter.location}
         onFilterChange={setFilter}
       />
-      <Chart fromDate={filter.fromDate} toDate={filter.toDate} />
+      <Chart fromDate={filter.fromDate} toDate={filter.toDate} location={location} />
     </>
   )
 }

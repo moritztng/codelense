@@ -15,9 +15,9 @@ import (
 )
 
 // TimePoints is the resolver for the timePoints field.
-func (r *queryResolver) TimePoints(ctx context.Context, fromDate int, toDate int) ([]*model.TimePoint, error) {
+func (r *queryResolver) TimePoints(ctx context.Context, fromDate int, toDate int, location string) ([]*model.TimePoint, error) {
 	query, _ := os.ReadFile("query.sql")
-	rows, err := r.Database.Query(context.Background(), string(query), fromDate, toDate)
+	rows, err := r.Database.Query(context.Background(), string(query), fromDate, toDate, location)
 	if err != nil {
 		log.Fatal(err)
 	}

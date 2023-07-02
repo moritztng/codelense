@@ -202,8 +202,26 @@ type getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNo
 	DatabaseId int `json:"databaseId"`
 	// The organization's login name.
 	Login string `json:"login"`
+	// The organization's public email.
+	Email string `json:"email"`
+	// The organization's public profile name.
+	Name string `json:"name"`
+	// The organization's public profile location.
+	Location string `json:"location"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
+	// A URL pointing to the organization's public avatar.
+	AvatarUrl string `json:"avatarUrl"`
+	// The organization's public profile description.
+	Description string `json:"description"`
+	// The organization's Twitter username.
+	TwitterUsername string `json:"twitterUsername"`
+	// Identifies the date and time when the object was last updated.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The organization's public profile URL.
+	WebsiteUrl string `json:"websiteUrl"`
+	// The HTTP URL for this organization.
+	Url string `json:"url"`
 }
 
 // GetTypename returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Typename, and is useful for accessing the field via an interface.
@@ -221,9 +239,54 @@ func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEd
 	return v.Login
 }
 
+// GetEmail returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Email, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetEmail() string {
+	return v.Email
+}
+
+// GetName returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Name, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetName() string {
+	return v.Name
+}
+
+// GetLocation returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Location, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetLocation() string {
+	return v.Location
+}
+
 // GetCreatedAt returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.CreatedAt, and is useful for accessing the field via an interface.
 func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetCreatedAt() time.Time {
 	return v.CreatedAt
+}
+
+// GetAvatarUrl returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetAvatarUrl() string {
+	return v.AvatarUrl
+}
+
+// GetDescription returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Description, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetDescription() string {
+	return v.Description
+}
+
+// GetTwitterUsername returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.TwitterUsername, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetTwitterUsername() string {
+	return v.TwitterUsername
+}
+
+// GetUpdatedAt returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetUpdatedAt() time.Time {
+	return v.UpdatedAt
+}
+
+// GetWebsiteUrl returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.WebsiteUrl, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetWebsiteUrl() string {
+	return v.WebsiteUrl
+}
+
+// GetUrl returns getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization.Url, and is useful for accessing the field via an interface.
+func (v *getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization) GetUrl() string {
+	return v.Url
 }
 
 // getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodePullRequest includes the requested fields of the GraphQL type PullRequest.
@@ -457,7 +520,16 @@ query getOrganizations ($cursor: String, $query: String!) {
 				... on Organization {
 					databaseId
 					login
+					email
+					name
+					location
 					createdAt
+					avatarUrl
+					description
+					twitterUsername
+					updatedAt
+					websiteUrl
+					url
 				}
 			}
 		}

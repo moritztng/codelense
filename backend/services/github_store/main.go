@@ -12,7 +12,6 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 func main() {
@@ -30,22 +29,21 @@ func main() {
 	}
 	kafkaConsumer, _ := kafka.NewConsumer(&kafkaConfig)
 	defer kafkaConsumer.Close()
-	kafkaConsumer.SubscribeTopics([]string{"github_load_organization", "github_load_events"}, nil)
+	kafkaConsumer.SubscribeTopics([]string{"github_load_organizations", "github_load_events"}, nil)
 	for {
 		message, err := kafkaConsumer.ReadMessage(time.Second)
 		if err == nil {
 			switch *message.TopicPartition.Topic {
-			case "github_load_organization":
+			case "github_load_organizations":
 				var organization model.Organization
 				json.Unmarshal(message.Value, &organization)
-				database.Clauses(clause.OnConflict{
-					Columns:   []clause.Column{{Name: "github_id"}},
-					DoUpdates: clause.AssignmentColumns([]string{"updated_at", "login", "name", "email", "description", "location", "twitter_username", "website_url", "url", "avatar_url", "github_created_at", "github_updated_at"}),
-				}).Create(&organization)
+				database.Create(&organization)
+				logger.Info("stored organization")
 			case "github_load_events":
 				var event model.Event
 				json.Unmarshal(message.Value, &event)
 				database.Create(&event)
+				logger.Info("stored event")
 			}
 		}
 	}

@@ -10,6 +10,7 @@ WITH FILTERED_EVENTS AS (
         AND EVENTS.GITHUB_CREATED_AT <= TO_TIMESTAMP($2)
         AND TYPE = 'WatchEvent'
         AND ORG_ID != 0
+        AND ORGANIZATIONS.LOCATION LIKE '%' | $3 | '%'
 )
 SELECT
     TIME,

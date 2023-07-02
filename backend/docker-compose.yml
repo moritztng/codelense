@@ -1,15 +1,5 @@
 version: '3.1'
 
-x-schedule: &schedule
-  extends:
-    file: ./services/schedule/docker-compose.yaml
-    service: schedule
-  depends_on:
-    broker:
-      condition: service_healthy
-    loki:
-      condition: service_started
-
 services:
 
   api:
@@ -30,25 +20,15 @@ services:
       loki:
         condition: service_started
 
-  github_load_events:
-    extends:
-      file: ./services/github_load_events/docker-compose.yaml
-      service: github_load_events
-    depends_on:
-      broker:
-        condition: service_healthy
-      loki:
-        condition: service_started
-
-  github_load_organization:
-    extends:
-      file: ./services/github_load_organization/docker-compose.yaml
-      service: github_load_organization
-    depends_on:
-      broker:
-        condition: service_healthy
-      loki:
-        condition: service_started
+  # github_load_events:
+  #   extends:
+  #     file: ./services/github_load_events/docker-compose.yaml
+  #     service: github_load_events
+  #   depends_on:
+  #     broker:
+  #       condition: service_healthy
+  #     loki:
+  #       condition: service_started
 
   github_load_organizations:
     extends:
@@ -59,35 +39,6 @@ services:
         condition: service_healthy
       loki:
         condition: service_started
-
-  github_query:
-    extends:
-      file: ./services/github_query/docker-compose.yaml
-      service: github_query
-    depends_on:
-      broker:
-        condition: service_healthy
-      loki:
-        condition: service_started
-
-  schedule_load_organizations:
-    <<: *schedule
-    environment:
-      NAME: load_organizations
-      CRON: "*/1 * * * *"
-
-  database:
-    extends:
-      file: ./services/database/docker-compose.yaml
-      service: database
-    depends_on:
-      loki:
-        condition: service_started
-  
-  pgadmin:
-    extends:
-      file: ./services/pgadmin/docker-compose.yaml
-      service: pgadmin
 
   zookeeper:
     extends:

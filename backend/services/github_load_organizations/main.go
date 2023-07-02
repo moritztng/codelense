@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -33,60 +32,46 @@ func main() {
 	kafkaProducer, _ := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT"))})
 	graphqlClient := graphql.NewClient("https://api.github.com/graphql",
 		&http.Client{Transport: &authedTransport{wrapped: http.DefaultTransport}})
-	kafkaConfig := kafka.ConfigMap{
-		"bootstrap.servers": fmt.Sprintf("%s:%s", os.Getenv("KAFKA_HOST"), os.Getenv("KAFKA_PORT")),
-		"group.id":          "github_load_organizations",
-		"auto.offset.reset": "earliest",
-	}
-	kafkaConsumer, _ := kafka.NewConsumer(&kafkaConfig)
-	defer kafkaConsumer.Close()
-	kafkaConsumer.SubscribeTopics([]string{"schedule_load_organizations"}, nil)
-	for {
-		_, err := kafkaConsumer.ReadMessage(time.Second)
-		if err != nil {
-			continue
-		}
-		minCreated := "1970-01-01"
-		createdAfterMin := true
-		var lastKeys map[int]struct{}
-		total := 0
-		for createdAfterMin {
-			keys := map[int]struct{}{}
-			createdAfterMin = false
-			hasNextPage := true
-			nextPageCursor := ""
-			query := fmt.Sprintf("location:Germany type:org sort:joined-asc created:>=%s", minCreated)
-			for hasNextPage {
-				response, _ := getOrganizations(context.Background(), graphqlClient, nextPageCursor, query)
-				edges := response.Search.Edges
-				for _, edge := range edges {
-					organization := edge.Node.(*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
-					_, exists := lastKeys[organization.DatabaseId]
-					if exists {
-						continue
-					}
-					organizationEventJson, _ := json.Marshal(model.OrganizationEvent{Login: organization.Login})
-					topic := "github_organization_events"
-					kafkaProducer.Produce(&kafka.Message{
-						TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-						Value:          organizationEventJson,
-					}, nil)
-					created := organization.CreatedAt.Format("2006-01-02")
-					if created != minCreated {
-						minCreated = created
-						createdAfterMin = true
-					}
-					keys[organization.DatabaseId] = struct{}{}
-					total += 1
+	minCreated := "1970-01-01"
+	createdAfterMin := true
+	var lastKeys map[int]struct{}
+	total := 0
+	for createdAfterMin {
+		keys := map[int]struct{}{}
+		createdAfterMin = false
+		hasNextPage := true
+		nextPageCursor := ""
+		query := fmt.Sprintf("location:Germany type:org sort:joined-asc created:>=%s", minCreated)
+		for hasNextPage {
+			response, _ := getOrganizations(context.Background(), graphqlClient, nextPageCursor, query)
+			edges := response.Search.Edges
+			for _, edge := range edges {
+				organization := edge.Node.(*getOrganizationsSearchSearchResultItemConnectionEdgesSearchResultItemEdgeNodeOrganization)
+				_, exists := lastKeys[organization.DatabaseId]
+				if exists {
+					continue
 				}
-				logger.Infow("loaded organizations", "created_after", minCreated, "total", total)
-				hasNextPage = response.Search.PageInfo.HasNextPage
-				nextPageCursor = response.Search.PageInfo.EndCursor
+				organizationJson, _ := json.Marshal(model.Organization{GithubID: uint(organization.DatabaseId), Login: organization.Login, Name: organization.Name, Location: organization.Location, GithubCreatedAt: organization.CreatedAt, Email: organization.Email, AvatarUrl: organization.AvatarUrl, Description: organization.Description, TwitterUsername: organization.TwitterUsername, GithubUpdatedAt: organization.UpdatedAt, WebsiteUrl: organization.WebsiteUrl, Url: organization.Url})
+				topic := "github_load_organizations"
+				kafkaProducer.Produce(&kafka.Message{
+					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+					Value:          organizationJson,
+				}, nil)
+				created := organization.CreatedAt.Format("2006-01-02")
+				if created != minCreated {
+					minCreated = created
+					createdAfterMin = true
+				}
+				keys[organization.DatabaseId] = struct{}{}
+				total += 1
 			}
-			lastKeys = keys
+			logger.Infow("loaded organizations", "created_after", minCreated, "total", total)
+			hasNextPage = response.Search.PageInfo.HasNextPage
+			nextPageCursor = response.Search.PageInfo.EndCursor
 		}
-		kafkaProducer.Flush(15 * 1000)
+		lastKeys = keys
 	}
+	kafkaProducer.Flush(15 * 1000)
 	logger.Info("stop")
 	kafkaProducer.Close()
 }
