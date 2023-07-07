@@ -1,5 +1,7 @@
 name: Deploy static content to Pages
-
+defaults:
+  run:
+      working-directory: frontend
 on:
   # Runs on pushes targeting the default branch
   push:
