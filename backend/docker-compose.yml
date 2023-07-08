@@ -6,77 +6,13 @@ services:
     extends:
       file: ./services/api/docker-compose.yaml
       service: api
-    depends_on:
-      loki:
-        condition: service_started
-
-  # github_store:
-  #   extends:
-  #     file: ./services/github_store/docker-compose.yaml
-  #     service: github_store
-  #   depends_on:
-  #     broker:
-  #       condition: service_healthy
-  #     loki:
-  #       condition: service_started
-
-  # github_load_events:
-  #   extends:
-  #     file: ./services/github_load_events/docker-compose.yaml
-  #     service: github_load_events
-  #   depends_on:
-  #     broker:
-  #       condition: service_healthy
-  #     loki:
-  #       condition: service_started
-
-  # github_load_organizations:
-  #   extends:
-  #     file: ./services/github_load_organizations/docker-compose.yaml
-  #     service: github_load_organizations
-  #   depends_on:
-  #     broker:
-  #       condition: service_healthy
-  #     loki:
-  #       condition: service_started
-
-  # zookeeper:
-  #   extends:
-  #     file: ./services/kafka/docker-compose.yaml
-  #     service: zookeeper
-  #   depends_on:
-  #     loki:
-  #       condition: service_started
-
-  # broker:
-  #   extends:
-  #     file: ./services/kafka/docker-compose.yaml
-  #     service: broker
-  #   depends_on:
-  #     zookeeper:
-  #       condition: service_started
-  #     loki:
-  #       condition: service_started
-
-  # grafana_database:
-  #   extends:
-  #     file: ./services/grafana/docker-compose.yaml
-  #     service: grafana_database
-  #   depends_on:
-  #     loki:
-  #       condition: service_started
-
-  # grafana:
-  #   extends:
-  #     file: ./services/grafana/docker-compose.yaml
-  #     service: grafana
-  #   depends_on:
-  #     grafana_database:
-  #       condition: service_healthy
-  #     loki:
-  #       condition: service_started
-
-  # loki:
-  #   extends:
-  #     file: ./services/grafana/docker-compose.yaml
-  #     service: loki
+ 
+  database:
+    extends:
+      file: ./services/database/docker-compose.yaml
+      service: database
+  
+  pgadmin:
+    extends:
+      file: ./services/pgadmin/docker-compose.yaml
+      service: pgadmin

@@ -13,7 +13,3 @@ services:
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
       DB_TIMEZONE: ${DB_TIMEZONE}
-    logging:
-      driver: loki
-      options:
-        loki-url: http://172.17.0.1:3100/loki/api/v1/push
