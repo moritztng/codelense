@@ -58,25 +58,25 @@ services:
   #     loki:
   #       condition: service_started
 
-  grafana_database:
-    extends:
-      file: ./services/grafana/docker-compose.yaml
-      service: grafana_database
-    depends_on:
-      loki:
-        condition: service_started
+  # grafana_database:
+  #   extends:
+  #     file: ./services/grafana/docker-compose.yaml
+  #     service: grafana_database
+  #   depends_on:
+  #     loki:
+  #       condition: service_started
 
-  grafana:
-    extends:
-      file: ./services/grafana/docker-compose.yaml
-      service: grafana
-    depends_on:
-      grafana_database:
-        condition: service_healthy
-      loki:
-        condition: service_started
+  # grafana:
+  #   extends:
+  #     file: ./services/grafana/docker-compose.yaml
+  #     service: grafana
+  #   depends_on:
+  #     grafana_database:
+  #       condition: service_healthy
+  #     loki:
+  #       condition: service_started
 
-  loki:
-    extends:
-      file: ./services/grafana/docker-compose.yaml
-      service: loki
+  # loki:
+  #   extends:
+  #     file: ./services/grafana/docker-compose.yaml
+  #     service: loki
