@@ -27,7 +27,7 @@ services:
   grafana:
     image: grafana/grafana-oss
     ports:
-      - 5004:3000
+      - ${GF_PORT}:3000
     user: '104'
     environment:
       GF_DATABASE_TYPE: ${GF_DB_TYPE}

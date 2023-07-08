@@ -3,8 +3,11 @@
 package model
 
 type Organization struct {
-	Login     string `json:"Login"`
-	AvatarURL string `json:"AvatarUrl"`
+	Name        string  `json:"Name"`
+	Location    *string `json:"Location,omitempty"`
+	Description *string `json:"Description,omitempty"`
+	URL         *string `json:"Url,omitempty"`
+	AvatarURL   *string `json:"AvatarUrl,omitempty"`
 }
 
 type TimePoint struct {

@@ -45,13 +45,16 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Organization struct {
-		AvatarURL func(childComplexity int) int
-		Login     func(childComplexity int) int
+		AvatarURL   func(childComplexity int) int
+		Description func(childComplexity int) int
+		Location    func(childComplexity int) int
+		Name        func(childComplexity int) int
+		URL         func(childComplexity int) int
 	}
 
 	Query struct {
 		Organization func(childComplexity int, githubID int) int
-		TimePoints   func(childComplexity int, fromDate int, toDate int, location string) int
+		TimePoints   func(childComplexity int, fromDate int, toDate int, location *string) int
 	}
 
 	TimePoint struct {
@@ -66,7 +69,7 @@ type ComplexityRoot struct {
 }
 
 type QueryResolver interface {
-	TimePoints(ctx context.Context, fromDate int, toDate int, location string) ([]*model.TimePoint, error)
+	TimePoints(ctx context.Context, fromDate int, toDate int, location *string) ([]*model.TimePoint, error)
 	Organization(ctx context.Context, githubID int) (*model.Organization, error)
 }
 
@@ -92,12 +95,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Organization.AvatarURL(childComplexity), true
 
-	case "Organization.Login":
-		if e.complexity.Organization.Login == nil {
+	case "Organization.Description":
+		if e.complexity.Organization.Description == nil {
 			break
 		}
 
-		return e.complexity.Organization.Login(childComplexity), true
+		return e.complexity.Organization.Description(childComplexity), true
+
+	case "Organization.Location":
+		if e.complexity.Organization.Location == nil {
+			break
+		}
+
+		return e.complexity.Organization.Location(childComplexity), true
+
+	case "Organization.Name":
+		if e.complexity.Organization.Name == nil {
+			break
+		}
+
+		return e.complexity.Organization.Name(childComplexity), true
+
+	case "Organization.Url":
+		if e.complexity.Organization.URL == nil {
+			break
+		}
+
+		return e.complexity.Organization.URL(childComplexity), true
 
 	case "Query.organization":
 		if e.complexity.Query.Organization == nil {
@@ -121,7 +145,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.TimePoints(childComplexity, args["fromDate"].(int), args["toDate"].(int), args["location"].(string)), true
+		return e.complexity.Query.TimePoints(childComplexity, args["fromDate"].(int), args["toDate"].(int), args["location"].(*string)), true
 
 	case "TimePoint.Time":
 		if e.complexity.TimePoint.Time == nil {
@@ -273,10 +297,10 @@ func (ec *executionContext) field_Query_timePoints_args(ctx context.Context, raw
 		}
 	}
 	args["toDate"] = arg1
-	var arg2 string
+	var arg2 *string
 	if tmp, ok := rawArgs["location"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -323,8 +347,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Organization_Login(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Organization_Login(ctx, field)
+func (ec *executionContext) _Organization_Name(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_Name(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -337,7 +361,7 @@ func (ec *executionContext) _Organization_Login(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Login, nil
+		return obj.Name, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -354,7 +378,130 @@ func (ec *executionContext) _Organization_Login(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Organization_Login(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Organization_Name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organization_Location(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_Location(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Location, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_Location(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organization_Description(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_Description(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_Description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organization_Url(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_Url(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_Url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Organization",
 		Field:      field,
@@ -388,14 +535,11 @@ func (ec *executionContext) _Organization_AvatarUrl(ctx context.Context, field g
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Organization_AvatarUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -425,7 +569,7 @@ func (ec *executionContext) _Query_timePoints(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().TimePoints(rctx, fc.Args["fromDate"].(int), fc.Args["toDate"].(int), fc.Args["location"].(string))
+		return ec.resolvers.Query().TimePoints(rctx, fc.Args["fromDate"].(int), fc.Args["toDate"].(int), fc.Args["location"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -439,7 +583,7 @@ func (ec *executionContext) _Query_timePoints(ctx context.Context, field graphql
 	}
 	res := resTmp.([]*model.TimePoint)
 	fc.Result = res
-	return ec.marshalNTimePoint2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePointᚄ(ctx, field.Selections, res)
+	return ec.marshalNTimePoint2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePoint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_timePoints(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -511,8 +655,14 @@ func (ec *executionContext) fieldContext_Query_organization(ctx context.Context,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "Login":
-				return ec.fieldContext_Organization_Login(ctx, field)
+			case "Name":
+				return ec.fieldContext_Organization_Name(ctx, field)
+			case "Location":
+				return ec.fieldContext_Organization_Location(ctx, field)
+			case "Description":
+				return ec.fieldContext_Organization_Description(ctx, field)
+			case "Url":
+				return ec.fieldContext_Organization_Url(ctx, field)
 			case "AvatarUrl":
 				return ec.fieldContext_Organization_AvatarUrl(ctx, field)
 			}
@@ -2635,20 +2785,29 @@ func (ec *executionContext) _Organization(ctx context.Context, sel ast.Selection
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Organization")
-		case "Login":
+		case "Name":
 
-			out.Values[i] = ec._Organization_Login(ctx, field, obj)
+			out.Values[i] = ec._Organization_Name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "Location":
+
+			out.Values[i] = ec._Organization_Location(ctx, field, obj)
+
+		case "Description":
+
+			out.Values[i] = ec._Organization_Description(ctx, field, obj)
+
+		case "Url":
+
+			out.Values[i] = ec._Organization_Url(ctx, field, obj)
+
 		case "AvatarUrl":
 
 			out.Values[i] = ec._Organization_AvatarUrl(ctx, field, obj)
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3195,7 +3354,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTimePoint2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePointᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.TimePoint) graphql.Marshaler {
+func (ec *executionContext) marshalNTimePoint2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePoint(ctx context.Context, sel ast.SelectionSet, v []*model.TimePoint) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3219,7 +3378,7 @@ func (ec *executionContext) marshalNTimePoint2ᚕᚖgithubᚗcomᚋmoritztngᚋc
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTimePoint2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePoint(ctx, sel, v[i])
+			ret[i] = ec.marshalOTimePoint2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePoint(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3230,23 +3389,7 @@ func (ec *executionContext) marshalNTimePoint2ᚕᚖgithubᚗcomᚋmoritztngᚋc
 	}
 	wg.Wait()
 
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
 	return ret
-}
-
-func (ec *executionContext) marshalNTimePoint2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePoint(ctx context.Context, sel ast.SelectionSet, v *model.TimePoint) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._TimePoint(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNValue2ᚕᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx context.Context, sel ast.SelectionSet, v []*model.Value) graphql.Marshaler {
@@ -3580,6 +3723,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOTimePoint2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐTimePoint(ctx context.Context, sel ast.SelectionSet, v *model.TimePoint) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TimePoint(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOValue2ᚖgithubᚗcomᚋmoritztngᚋcodelenseᚋbackendᚋservicesᚋapiᚋgraphᚋmodelᚐValue(ctx context.Context, sel ast.SelectionSet, v *model.Value) graphql.Marshaler {

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -24,7 +23,7 @@ func main() {
 	logger.Info("start")
 	pgxPool, err := pgxpool.New(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME")))
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
+		logger.Fatalf("Unable to connect to database: %v\n", err)
 		os.Exit(1)
 	}
 	defer pgxPool.Close()
