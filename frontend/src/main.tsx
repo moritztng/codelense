@@ -3,14 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import 'bootstrap/dist/css/bootstrap.css'
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-} from '@apollo/client'
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
 
 const client = new ApolloClient({
-  uri: 'http://20.8.117.238:5005/query',
+  uri: import.meta.env.API_URL,
   cache: new InMemoryCache(),
 })
 
