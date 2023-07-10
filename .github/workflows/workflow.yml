@@ -4,6 +4,9 @@ defaults:
   run:
       working-directory: frontend
 
+env:
+  API_URL: https://api-qk7taq7mza-ez.a.run.app/query
+
 on:
   # Runs on pushes targeting the default branch
   push:
