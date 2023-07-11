@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
 
 const client = new ApolloClient({
-  uri: import.meta.env.API_URL,
+  uri: import.meta.env.VITE_API_URL,
   cache: new InMemoryCache(),
 })
 
