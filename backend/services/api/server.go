@@ -28,6 +28,9 @@ func main() {
 	}
 	defer pgxPool.Close()
 
+	eventsQuery, _ := os.ReadFile("query_events.sql")
+	organizationsQuery, _ := os.ReadFile("query_organizations.sql")
+
 	router := chi.NewRouter()
 	router.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -35,13 +38,11 @@ func main() {
 		Debug:            true,
 	}).Handler)
 
-	port := os.Getenv("PORT")
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Database: pgxPool}}))
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Database: pgxPool, Logger: logger, EventsQuery: string(eventsQuery), OrganizationsQuery: string(organizationsQuery)}}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
 
-	logger.Infof("connect to http://localhost:%s/ for GraphQL playground", port)
-	logger.Fatal(http.ListenAndServe(":"+port, router))
+	logger.Fatal(http.ListenAndServe(":"+os.Getenv("API_PORT"), router))
 	logger.Info("stop")
 }

@@ -1,11 +1,6 @@
 version: '3.1'
 
 services:
-
-  api:
-    extends:
-      file: ./services/api/docker-compose.yaml
-      service: api
  
   database:
     extends:

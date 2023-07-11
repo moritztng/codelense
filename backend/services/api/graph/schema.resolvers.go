@@ -6,25 +6,18 @@ package graph
 
 import (
 	"context"
-	"log"
-	"os"
 	"strconv"
 
 	pgx "github.com/jackc/pgx/v5"
 	"github.com/moritztng/codelense/backend/services/api/graph/model"
-	"go.uber.org/zap"
 )
 
 // TimePoints is the resolver for the timePoints field.
 func (r *queryResolver) TimePoints(ctx context.Context, fromDate int, toDate int, location *string) ([]*model.TimePoint, error) {
-	baseLogger, _ := zap.NewProduction()
-	logger := baseLogger.Sugar()
-	defer logger.Sync()
-	logger.Infow("query timepoints", "fromDate", fromDate, "toDate", toDate, "location", *location)
-	query, _ := os.ReadFile("query_events.sql")
-	rows, err := r.Database.Query(context.Background(), string(query), fromDate, toDate, location)
+	r.Logger.Infow("query timepoints", "fromDate", fromDate, "toDate", toDate, "location", *location)
+	rows, err := r.Database.Query(context.Background(), r.EventsQuery, fromDate, toDate, location)
 	if err != nil {
-		logger.Fatal(err)
+		r.Logger.Fatal(err)
 	}
 	var time int
 	var orgId int
@@ -42,26 +35,22 @@ func (r *queryResolver) TimePoints(ctx context.Context, fromDate int, toDate int
 		return nil
 	})
 	if err != nil {
-		log.Fatal(err)
+		r.Logger.Fatal(err)
 	}
 	return timePoints, nil
 }
 
 // Organization is the resolver for the organization field.
 func (r *queryResolver) Organization(ctx context.Context, githubID int) (*model.Organization, error) {
-	baseLogger, _ := zap.NewProduction()
-	logger := baseLogger.Sugar()
-	defer logger.Sync()
-	logger.Infow("query organization", "githubID", githubID)
-	query, _ := os.ReadFile("query_organizations.sql")
+	r.Logger.Infow("query organization", "githubID", githubID)
 	var name string
 	var location string
 	var description string
 	var url string
 	var avatarUrl string
-	err := r.Database.QueryRow(context.Background(), string(query), githubID).Scan(&name, &location, &description, &url, &avatarUrl)
+	err := r.Database.QueryRow(context.Background(), r.OrganizationsQuery, githubID).Scan(&name, &location, &description, &url, &avatarUrl)
 	if err != nil {
-		log.Fatal(err)
+		r.Logger.Fatal(err)
 	}
 	return &model.Organization{Name: name, Location: &location, Description: &description, URL: &url, AvatarURL: &avatarUrl}, nil
 }
