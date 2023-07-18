@@ -5,7 +5,7 @@ defaults:
       working-directory: frontend
 
 env:
-  VITE_API_URL: https://api-qk7taq7mza-ez.a.run.app/query
+  VITE_API_URL: https://api-pbrwdabcwq-ez.a.run.app/query
 
 on:
   # Runs on pushes targeting the default branch
